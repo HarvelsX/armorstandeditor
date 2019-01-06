@@ -128,11 +128,11 @@ public class InventoryMenu implements Listener {
 		if (!inventory.getViewers().contains(event.getWhoClicked())) {
 			return;
 		}
-		if (!LEGIT_ACTIONS.contains(event.getAction())) {
-			event.setCancelled(true);
-		}
 		if (!event.getClickedInventory().equals(inventory)) {
 			return;
+		}
+		if (!LEGIT_ACTIONS.contains(event.getAction())) {
+			event.setCancelled(true);
 		}
 		if (locked) {
 			event.setCancelled(true);
