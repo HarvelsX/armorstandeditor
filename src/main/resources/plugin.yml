@@ -1,12 +1,10 @@
-name: ArmorStandEditor
+name: ArmorStandAdjustor
 author: petomka
 version: ${project.version}
 main: me.petomka.armorstandeditor.Main
 
 api-version: 1.13
 
-depend: ['Yamler']
-
 commands:
   armorstandeditor:
-    aliases: ['aes', 'as', 'aedit']
+    aliases: ['aes', 'as', 'aedit', 'armorstandadjustor', 'asa']

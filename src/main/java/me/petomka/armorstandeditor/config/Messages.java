@@ -5,6 +5,7 @@ import lombok.Setter;
 import me.petomka.armorstandeditor.Main;
 import net.cubespace.Yamler.Config.Comment;
 import net.cubespace.Yamler.Config.Config;
+import net.cubespace.Yamler.Config.ConfigMode;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
 
 import java.io.File;
@@ -16,7 +17,7 @@ public class Messages extends Config {
 	public Messages(Main main) throws InvalidConfigurationException {
 		CONFIG_HEADER = new String[]{"Message configuration"};
 		CONFIG_FILE = new File(main.getDataFolder(), "messages.yml");
-
+		CONFIG_MODE = ConfigMode.DEFAULT;
 		init();
 	}
 

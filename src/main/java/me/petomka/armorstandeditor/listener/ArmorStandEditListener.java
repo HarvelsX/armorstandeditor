@@ -697,7 +697,7 @@ public class ArmorStandEditListener implements Listener {
 			playClickSound(player);
 		});
 
-		if (player.hasPermission(Main.getInstance().getDefaultConfig().getPlaceNBTArmorStandPermission())) {
+		if (player.hasPermission(Main.getInstance().getDefaultConfig().getCopyArmorStandPermission())) {
 			menu.addItemAndClickHandler(MenuItem.CREATE_COPY, 4, 7, (p, i) -> {
 				openArmorStandMenu(player, backHandler);
 				ItemStack copy = ArmorStandUtils.saveToItem(armorStand, player);

@@ -44,8 +44,11 @@ public class DefaultConfig extends Config {
 	@Comment("Permission required to perform a reload of config.yml and messages.yml")
 	private String reloadPermission = "armorstandedit.reload";
 
-	@Comment("Permission required to copy and place armorstands with saved NBT data")
-	private String placeNBTArmorStandPermission = "armorstandedit.nbt";
+	@Comment("Permission required to place armorstands with saved NBT data")
+	private String placeNBTArmorStandPermission = "armorstandedit.placecopy";
+
+	@Comment("Permission required to create a copy of an armor stand in the gui")
+	private String copyArmorStandPermission = "armorstandedit.copy";
 
 	@Comment("Permission required to give a colored name to an armorstand with a nametag")
 	private String colorNameTagsPermission = "armorstandedit.colornametag";

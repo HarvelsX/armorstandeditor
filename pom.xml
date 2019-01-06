@@ -25,13 +25,41 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <finalName>ArmorStandAdjustor-${project.version}</finalName>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.2.1</version>
+                <configuration>
+                    <!-- put your configurations here -->
+                </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
                         <configuration>
-                            <finalName>ArmorStandEditor-${project.version}</finalName>
+                            <artifactSet>
+                                <includes>
+                                    <include>net.cubespace:Yamler-Core</include>
+                                </includes>
+                            </artifactSet>
+
+                            <relocations>
+                                <relocation>
+                                    <pattern>net.cubespace</pattern>
+                                    <shadedPattern>me.petomka.armorstandeditor.net.cubespace</shadedPattern>
+                                    <includes>
+                                        <include>net.cubespace.*</include>
+                                    </includes>
+                                </relocation>
+                            </relocations>
                         </configuration>
                     </execution>
                 </executions>
