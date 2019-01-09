@@ -14,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -152,6 +153,7 @@ public class InventoryMenu implements Listener {
 		if (!event.getInventory().equals(inventory)) {
 			return;
 		}
+		HandlerList.unregisterAll(this);
 		if (closeHandler != null) {
 			Bukkit.getScheduler().runTaskLater(Main.getInstance(), closeHandler, 1L);
 		}
