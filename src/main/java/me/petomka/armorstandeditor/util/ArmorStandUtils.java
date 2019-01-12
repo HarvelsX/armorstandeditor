@@ -18,14 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.EulerAngle;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -127,12 +120,22 @@ public class ArmorStandUtils {
 		if (!euler) {
 			return true;
 		}
-		return isItemThere(armorStand.getHelmet())
+		boolean item = isItemThere(armorStand.getHelmet())
 				|| isItemThere(armorStand.getChestplate())
 				|| isItemThere(armorStand.getLeggings())
 				|| isItemThere(armorStand.getBoots())
 				|| isItemThere(armorStand.getEquipment().getItemInMainHand())
 				|| isItemThere(armorStand.getEquipment().getItemInOffHand());
+		if (item) {
+			return true;
+		}
+		return armorStand.isGlowing()
+				|| armorStand.hasArms()
+				|| !armorStand.hasBasePlate()
+				|| !armorStand.hasGravity()
+				|| armorStand.isInvulnerable()
+				|| armorStand.isCustomNameVisible()
+				|| armorStand.isSmall();
 	}
 
 	private boolean isEulerNormal(EulerAngle angle, double threshold) {
