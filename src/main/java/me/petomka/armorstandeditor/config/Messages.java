@@ -21,6 +21,8 @@ public class Messages extends Config {
 		init();
 	}
 
+	private String playerNotFound = "&cA player called \"{name}\" was not found on this server.";
+
 	@Comment("Message when trying to execute the armorstandeditor command without permission")
 	private String noPermissionMessage = "&cYou do not have permission to do this.";
 
@@ -98,4 +100,7 @@ public class Messages extends Config {
 	private String copiedArmorStandItemName = "&rCopy of {name}";
 	private String copyDefaultName = "Armorstand";
 	private String copiedArmorStandLore = "&6&o(+ArmorStandEditor NBT)";
+
+	private String toggle_on = "&2Enabled &aarmor stand editing for &6{name}";
+	private String toggle_off = "&cDisabled &aarmor stand editing for &6{name}";
 }

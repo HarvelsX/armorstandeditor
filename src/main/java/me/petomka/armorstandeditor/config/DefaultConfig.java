@@ -44,6 +44,9 @@ public class DefaultConfig extends Config {
 	@Comment("Permission required to perform a reload of config.yml and messages.yml")
 	private String reloadPermission = "armorstandedit.reload";
 
+	@Comment("Permission required to enable or disable editing for other players")
+	private String toggleOthersPermission = "armorstandedit.toggle_others";
+
 	@Comment("Permission required to place armorstands with saved NBT data")
 	private String placeNBTArmorStandPermission = "armorstandedit.placecopy";
 

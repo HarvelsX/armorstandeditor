@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import lombok.Getter;
 import me.petomka.armorstandeditor.command.ArmorStandEditorCommand;
 import me.petomka.armorstandeditor.config.DefaultConfig;
+import me.petomka.armorstandeditor.config.DisabledPlayersStorage;
 import me.petomka.armorstandeditor.config.Messages;
 import me.petomka.armorstandeditor.handler.ArmorStandEditHandler;
 import me.petomka.armorstandeditor.inventory.InventoryMenu;
@@ -36,6 +37,9 @@ public class Main extends JavaPlugin {
 	@Getter
 	private DefaultConfig defaultConfig;
 
+	@Getter
+	private DisabledPlayersStorage disabledPlayersStorage;
+
 	@Override
 	public void onEnable() {
 		instance = this;
@@ -56,6 +60,14 @@ public class Main extends JavaPlugin {
 			return;
 		}
 
+		try {
+			disabledPlayersStorage = new DisabledPlayersStorage(this);
+		} catch (InvalidConfigurationException e) {
+			getLogger().log(Level.SEVERE, "Your disabled_players.yml is invalid.", e);
+			panic();
+			return;
+		}
+
 		new ArmorStandEditHandler(this);
 
 		PluginManager manager = Bukkit.getPluginManager();
@@ -66,6 +78,23 @@ public class Main extends JavaPlugin {
 
 		InventoryMenu.reloadItemNames();
 		MenuItem.reloadMenuItems();
+	}
+
+	@Override
+	public void onDisable() {
+		messages = null;
+		defaultConfig = null;
+
+		if (disabledPlayersStorage != null) {
+			try {
+				disabledPlayersStorage.save();
+			} catch (InvalidConfigurationException e) {
+				getLogger().log(Level.SEVERE, "Error saving disabled_players.yml!", e);
+			}
+		}
+
+		disabledPlayersStorage = null;
+		instance = null;
 	}
 
 	private void panic() {

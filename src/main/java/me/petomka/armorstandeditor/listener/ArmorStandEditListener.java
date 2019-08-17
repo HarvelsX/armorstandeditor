@@ -12,13 +12,7 @@ import me.petomka.armorstandeditor.handler.Part;
 import me.petomka.armorstandeditor.inventory.InventoryMenu;
 import me.petomka.armorstandeditor.inventory.MenuItem;
 import me.petomka.armorstandeditor.util.ArmorStandUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
@@ -64,6 +58,10 @@ public class ArmorStandEditListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onAtEntityClick(PlayerInteractAtEntityEvent event) {
 		if (eventsToIgnore.remove(event)) {
+			return;
+		}
+
+		if (Main.getInstance().getDisabledPlayersStorage().getDisabledPlayers().contains(event.getPlayer().getUniqueId())) {
 			return;
 		}
 

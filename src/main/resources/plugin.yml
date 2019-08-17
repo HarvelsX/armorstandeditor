@@ -2,8 +2,9 @@ name: ArmorStandAdjustor
 author: petomka
 version: ${project.version}
 main: me.petomka.armorstandeditor.Main
+website: https://www.spigotmc.org/resources/armor-stand-adjustor.63811/
 
-api-version: 1.13
+api-version: 1.14
 
 commands:
   armorstandeditor:
