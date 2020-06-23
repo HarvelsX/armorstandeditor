@@ -13,10 +13,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.2</version>
+                <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>11</source>
+                    <target>11</target>
                     <annotationProcessors>
                         <annotationProcessor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor
                         </annotationProcessor>
@@ -107,6 +107,7 @@
             <groupId>net.cubespace</groupId>
             <artifactId>Yamler-Core</artifactId>
             <version>2.3.0-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305 -->
@@ -116,12 +117,6 @@
             <version>3.0.2</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>de.unlimitedworld</groupId>
-            <artifactId>uwlibbukkit</artifactId>
-            <version>1.15-SNAPSHOT</version>
-        </dependency>
-
     </dependencies>
 
 

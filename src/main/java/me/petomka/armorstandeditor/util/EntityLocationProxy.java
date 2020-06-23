@@ -18,9 +18,6 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -34,16 +31,14 @@ public class EntityLocationProxy implements Entity {
 	private final Location location;
 
 	@Override
-	@NotNull
+
 	public Location getLocation() {
 		return location;
 	}
 
 	@Override
-	@Nullable
-	@Contract("null -> null; !null -> !null")
 	public Location getLocation(Location location) {
-		if(location == null) {
+		if (location == null) {
 			return null;
 		}
 		Location l = this.location;
@@ -63,7 +58,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public Vector getVelocity() {
 		return originalEntity.getVelocity();
 	}
@@ -79,7 +73,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public BoundingBox getBoundingBox() {
 		return originalEntity.getBoundingBox();
 	}
@@ -90,7 +83,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public World getWorld() {
 		return originalEntity.getWorld();
 	}
@@ -121,7 +113,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public List<Entity> getNearbyEntities(double v, double v1, double v2) {
 		return originalEntity.getNearbyEntities(v, v1, v2);
 	}
@@ -162,7 +153,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public Server getServer() {
 		return originalEntity.getServer();
 	}
@@ -180,7 +170,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@Nullable
 	@Deprecated
 	public Entity getPassenger() {
 		return originalEntity.getPassenger();
@@ -193,7 +182,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public List<Entity> getPassengers() {
 		return originalEntity.getPassengers();
 	}
@@ -234,13 +222,11 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@Nullable
 	public EntityDamageEvent getLastDamageCause() {
 		return originalEntity.getLastDamageCause();
 	}
 
 	@Override
-	@NotNull
 	public UUID getUniqueId() {
 		return originalEntity.getUniqueId();
 	}
@@ -261,7 +247,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public EntityType getType() {
 		return originalEntity.getType();
 	}
@@ -277,7 +262,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@Nullable
 	public Entity getVehicle() {
 		return originalEntity.getVehicle();
 	}
@@ -343,7 +327,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public Set<String> getScoreboardTags() {
 		return originalEntity.getScoreboardTags();
 	}
@@ -359,19 +342,16 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public PistonMoveReaction getPistonMoveReaction() {
 		return originalEntity.getPistonMoveReaction();
 	}
 
 	@Override
-	@NotNull
 	public BlockFace getFacing() {
 		return originalEntity.getFacing();
 	}
 
 	@Override
-	@NotNull
 	public Spigot spigot() {
 		return originalEntity.spigot();
 	}
@@ -382,7 +362,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public List<MetadataValue> getMetadata(String s) {
 		return originalEntity.getMetadata(s);
 	}
@@ -408,7 +387,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public String getName() {
 		return originalEntity.getName();
 	}
@@ -434,25 +412,21 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public PermissionAttachment addAttachment(Plugin plugin, String s, boolean b) {
 		return originalEntity.addAttachment(plugin, s, b);
 	}
 
 	@Override
-	@NotNull
 	public PermissionAttachment addAttachment(Plugin plugin) {
 		return originalEntity.addAttachment(plugin);
 	}
 
 	@Override
-	@Nullable
 	public PermissionAttachment addAttachment(Plugin plugin, String s, boolean b, int i) {
 		return originalEntity.addAttachment(plugin, s, b, i);
 	}
 
 	@Override
-	@Nullable
 	public PermissionAttachment addAttachment(Plugin plugin, int i) {
 		return originalEntity.addAttachment(plugin, i);
 	}
@@ -468,7 +442,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@NotNull
 	public Set<PermissionAttachmentInfo> getEffectivePermissions() {
 		return originalEntity.getEffectivePermissions();
 	}
@@ -484,7 +457,6 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
-	@Nullable
 	public String getCustomName() {
 		return originalEntity.getCustomName();
 	}
