@@ -11,11 +11,20 @@ import me.petomka.armorstandeditor.inventory.InventoryMenu;
 import me.petomka.armorstandeditor.inventory.MenuItem;
 import me.petomka.armorstandeditor.listener.ArmorStandEditListener;
 import me.petomka.armorstandeditor.listener.PlayerListener;
+import me.petomka.armorstandeditor.util.EntityLocationProxy;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
 import java.util.Collection;
 import java.util.List;
@@ -71,7 +80,7 @@ public class Main extends JavaPlugin {
 		new ArmorStandEditHandler(this);
 
 		PluginManager manager = Bukkit.getPluginManager();
-		manager.registerEvents(new ArmorStandEditListener(), this);
+		manager.registerEvents(new ArmorStandEditListener(this), this);
 		manager.registerEvents(new PlayerListener(), this);
 
 		getCommand("armorstandeditor").setExecutor(new ArmorStandEditorCommand());
@@ -100,6 +109,19 @@ public class Main extends JavaPlugin {
 	private void panic() {
 		getLogger().log(Level.SEVERE, "Disabling plugin due to startup error.");
 		Bukkit.getPluginManager().disablePlugin(this);
+	}
+
+	public boolean isInteractCancelled(Player player, Collection<ArmorStand> entities, Vector delta) {
+		double x = delta.getX(), y = delta.getY(), z = delta.getZ();
+		return entities.stream()
+				.map(as -> {
+					EntityLocationProxy proxy = new EntityLocationProxy(as, as.getLocation().add(x, y, z));
+					PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, proxy);
+					ArmorStandEditListener.getEventsToIgnore().add(event);
+					Bukkit.getPluginManager().callEvent(event);
+					return event;
+				})
+				.anyMatch(Cancellable::isCancelled);
 	}
 
 	public static String colorString(String s) {

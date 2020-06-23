@@ -4,7 +4,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import me.petomka.armorstandeditor.Main;
+import me.petomka.armorstandeditor.config.DefaultConfig;
 import me.petomka.armorstandeditor.config.Messages;
 import me.petomka.armorstandeditor.handler.Accuracy;
 import me.petomka.armorstandeditor.handler.ArmorStandEditHandler;
@@ -17,22 +19,14 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -40,15 +34,20 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
+import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
+@RequiredArgsConstructor
 public class ArmorStandEditListener implements Listener {
 
 	private Set<UUID> doubleClicks = Sets.newHashSet();
+
+	private final Main plugin;
 
 	@Getter
 	private static Set<Event> eventsToIgnore = Sets.newHashSet();
@@ -293,9 +292,15 @@ public class ArmorStandEditListener implements Listener {
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onItemSwap(PlayerSwapHandItemsEvent event) {
 		if (ArmorStandEditHandler.getInstance().isProModeEditor(event.getPlayer().getUniqueId())) {
+			event.setCancelled(true);
+			DefaultConfig config = Main.getInstance().getDefaultConfig();
+			Messages messages = Main.getInstance().getMessages();
+			if (!event.getPlayer().hasPermission(config.getGlowingPermission())) {
+				event.getPlayer().sendMessage(Main.colorString(messages.getProModeGlowingNotAllowed()));
+				return;
+			}
 			ArmorStandEditHandler.getInstance().getSingleArmorstand(event.getPlayer().getUniqueId())
 					.ifPresent(armorStand -> armorStand.setGlowing(!armorStand.isGlowing()));
-			event.setCancelled(true);
 			if (Main.getInstance().getDefaultConfig().isPlaySounds()) {
 				event.getPlayer().playSound(event.getPlayer().getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT,
 						SoundCategory.MASTER, 1f, 1f);
@@ -400,6 +405,9 @@ public class ArmorStandEditListener implements Listener {
 			return;
 		}
 		if (!player.hasPermission(Main.getInstance().getDefaultConfig().getColorNameTagsPermission())) {
+			return;
+		}
+		if (plugin.isInteractCancelled(player, Collections.singleton(armorStand), new Vector(0, 0, 0))) {
 			return;
 		}
 		ItemMeta meta = nameTag.getItemMeta();
@@ -511,6 +519,9 @@ public class ArmorStandEditListener implements Listener {
 
 	private void handleLeatherRotate(Cancellable event, Player player, ArmorStand armorStand, boolean clockWise) {
 		if (!player.hasPermission(Main.getInstance().getDefaultConfig().getRotateLeatherPermission())) {
+			return;
+		}
+		if (plugin.isInteractCancelled(player, Collections.singleton(armorStand), new Vector(0, 0, 0))) {
 			return;
 		}
 		event.setCancelled(true);
@@ -629,74 +640,106 @@ public class ArmorStandEditListener implements Listener {
 
 		menu.fillBorder();
 
-		menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_ARMS, 1, 1, (p, i) -> {
-			armorStand.setArms(!armorStand.hasArms());
-			openArmorStandMenu(player, backHandler);
-			playToggleSound(player);
-		});
+		DefaultConfig config = Main.getInstance().getDefaultConfig();
 
-		addBoolItem(menu, 2, 1, armorStand::hasArms);
+		int menuIndex = 1;
 
-		menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_BASEPLATE, 1, 2, (p, i) -> {
-			armorStand.setBasePlate(!armorStand.hasBasePlate());
-			openArmorStandMenu(player, backHandler);
-			playToggleSound(player);
-		});
+		/*
+		 * 1 -> 1, 1
+		 * 2 -> 1, 2
+		 * ...
+		 * 7 -> 1, 7
+		 * 8 -> 3 2*(x // 7) + 1 , 1 ((x - 1) % 7) + 1
+		 * */
+		IntUnaryOperator rowFunction = x -> 2 * Math.floorDiv(x, 7) + 1;
+		IntUnaryOperator columnFunction = x -> ((x - 1) % 7) + 1;
 
-		addBoolItem(menu, 2, 2, armorStand::hasBasePlate);
+		//Arms
+		if (player.hasPermission(config.getShowArmsPermission())) {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_ARMS, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+				armorStand.setArms(!armorStand.hasArms());
+				openArmorStandMenu(player, backHandler);
+				playToggleSound(player);
+			});
+			addBoolItem(menu, 2, 1, armorStand::hasArms);
+		}
 
-		menu.addItemAndClickHandler(MenuItem.TOGGLE_SMALL_ARMORSTAND, 1, 3, (p, i) -> {
-			armorStand.setSmall(!armorStand.isSmall());
-			openArmorStandMenu(player, backHandler);
-			playToggleSound(player);
-		});
+		//Baseplate
+		if (player.hasPermission(config.getShowBasePlatePermission())) {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_BASEPLATE, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+				armorStand.setBasePlate(!armorStand.hasBasePlate());
+				openArmorStandMenu(player, backHandler);
+				playToggleSound(player);
+			});
+			addBoolItem(menu, 2, 2, armorStand::hasBasePlate);
+		}
 
-		addBoolItem(menu, 2, 3, armorStand::isSmall);
+		//Small Armorstand
+		if (player.hasPermission(config.getSmallArmorStandPermission())) {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_SMALL_ARMORSTAND, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+				armorStand.setSmall(!armorStand.isSmall());
+				openArmorStandMenu(player, backHandler);
+				playToggleSound(player);
+			});
+			addBoolItem(menu, 2, 3, armorStand::isSmall);
+		}
 
-		menu.addItemAndClickHandler(MenuItem.TOGGLE_INVULNERABILITY, 1, 4, (p, i) -> {
-			armorStand.setInvulnerable(!armorStand.isInvulnerable());
-			openArmorStandMenu(player, backHandler);
-			playToggleSound(player);
-		});
+		//Invulnerability
+		if (player.hasPermission(config.getInvulnerableArmorStandPermission())) {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_INVULNERABILITY, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+				armorStand.setInvulnerable(!armorStand.isInvulnerable());
+				openArmorStandMenu(player, backHandler);
+				playToggleSound(player);
+			});
+			addBoolItem(menu, 2, 4, armorStand::isInvulnerable);
+		}
 
-		addBoolItem(menu, 2, 4, armorStand::isInvulnerable);
+		//Gravity
+		if (player.hasPermission(config.getGravityPermission())) {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_GRAVITY, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+				armorStand.setGravity(!armorStand.hasGravity());
+				openArmorStandMenu(player, backHandler);
+				playToggleSound(player);
+			});
+			addBoolItem(menu, 2, 5, armorStand::hasGravity);
+		}
 
-		menu.addItemAndClickHandler(MenuItem.TOGGLE_GRAVITY, 1, 5, (p, i) -> {
-			armorStand.setGravity(!armorStand.hasGravity());
-			openArmorStandMenu(player, backHandler);
-			playToggleSound(player);
-		});
+		//Visibility
+		if (player.hasPermission(config.getVisibilityPermission())) {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_VISIBILITY, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+				armorStand.setVisible(!armorStand.isVisible());
+				openArmorStandMenu(player, backHandler);
+				playToggleSound(player);
+			});
+			addBoolItem(menu, 2, 6, armorStand::isVisible);
+		}
 
-		addBoolItem(menu, 2, 5, armorStand::hasGravity);
+		//Custom name
+		if (player.hasPermission(config.getCustomNamePermission())) {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_CUSTOM_NAME, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+				armorStand.setCustomNameVisible(!armorStand.isCustomNameVisible());
+				openArmorStandMenu(player, backHandler);
+				playToggleSound(player);
+			});
+			addBoolItem(menu, 2, 7, armorStand::isCustomNameVisible);
+		}
 
-		menu.addItemAndClickHandler(MenuItem.TOGGLE_VISIBILITY, 1, 6, (p, i) -> {
-			armorStand.setVisible(!armorStand.isVisible());
-			openArmorStandMenu(player, backHandler);
-			playToggleSound(player);
-		});
+		//Glowing
+		if (player.hasPermission(config.getGlowingPermission())) {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_GLOWING, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex), (p, i) -> {
+				armorStand.setGlowing(!armorStand.isGlowing());
+				openArmorStandMenu(player, backHandler);
+				playToggleSound(player);
+			});
+			addBoolItem(menu, 4, 1, armorStand::isGlowing);
+		}
 
-		addBoolItem(menu, 2, 6, armorStand::isVisible);
-
-		menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_CUSTOM_NAME, 1, 7, (p, i) -> {
-			armorStand.setCustomNameVisible(!armorStand.isCustomNameVisible());
-			openArmorStandMenu(player, backHandler);
-			playToggleSound(player);
-		});
-
-		addBoolItem(menu, 2, 7, armorStand::isCustomNameVisible);
-
-		menu.addItemAndClickHandler(MenuItem.TOGGLE_GLOWING, 3, 1, (p, i) -> {
-			armorStand.setGlowing(!armorStand.isGlowing());
-			openArmorStandMenu(player, backHandler);
-			playToggleSound(player);
-		});
-
-		addBoolItem(menu, 4, 1, armorStand::isGlowing);
-
-		menu.addItemAndClickHandler(MenuItem.SET_EQUIP, 4, 6, (p, i) -> {
-			openEquipMenu(player, () -> openArmorStandMenu(player, backHandler), armorStand);
-			playClickSound(player);
-		});
+		if (player.hasPermission(config.getSetEquipPermission())) {
+			menu.addItemAndClickHandler(MenuItem.SET_EQUIP, 4, 6, (p, i) -> {
+				openEquipMenu(player, () -> openArmorStandMenu(player, backHandler), armorStand);
+				playClickSound(player);
+			});
+		}
 
 		if (player.hasPermission(Main.getInstance().getDefaultConfig().getCopyArmorStandPermission())) {
 			menu.addItemAndClickHandler(MenuItem.CREATE_COPY, 4, 7, (p, i) -> {

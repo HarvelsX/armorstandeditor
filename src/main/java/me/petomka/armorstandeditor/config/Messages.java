@@ -44,6 +44,8 @@ public class Messages extends Config {
 	@Comment("What is to be displayed as scoreboard title when editing")
 	private String editingInfo = "&cEditing {part}";
 
+	private String proModeGlowingNotAllowed = "&cSorry, but you are not allowed to toggle glowing effect.";
+
 	@Comment("Name for each part")
 	private String headName = "head";
 	private String leftArmName = "left arm";

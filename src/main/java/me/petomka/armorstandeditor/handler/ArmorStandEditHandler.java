@@ -7,6 +7,7 @@ import com.google.common.collect.Sets;
 import lombok.Getter;
 import me.petomka.armorstandeditor.Main;
 import me.petomka.armorstandeditor.listener.ArmorStandEditListener;
+import me.petomka.armorstandeditor.util.EntityLocationProxy;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
@@ -17,11 +18,7 @@ import org.bukkit.util.Vector;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
@@ -32,8 +29,11 @@ public class ArmorStandEditHandler {
 
 	private ActionBarTask actionBarTask = new ActionBarTask();
 
+	private Main plugin;
+
 	public ArmorStandEditHandler(Main main) {
 		instance = this;
+		this.plugin = main;
 
 		actionBarTask.runTaskTimerAsynchronously(main, 30L, 30L);
 	}
@@ -240,30 +240,8 @@ public class ArmorStandEditHandler {
 			return;
 		}
 
-		if (part == Part.BODY) {
-			boolean cancel = armorStands.stream()
-					.map(as -> {
-						PlayerInteractEntityEvent event = new PlayerInteractAtEntityEvent(thePlayer, as, new Vector(x - 0.5, y, z - 0.5));
-						ArmorStandEditListener.getEventsToIgnore().add(event);
-						Bukkit.getPluginManager().callEvent(event);
-						return event;
-					})
-					.anyMatch(Cancellable::isCancelled);
-			if (!cancel) {
-				cancel = armorStands.stream()
-						.map(as -> {
-							int yAdd = as.isSmall() ? 1 : 2;
-							PlayerInteractEntityEvent event = new PlayerInteractAtEntityEvent(thePlayer, as, new Vector(x + 0.5, y + yAdd, z + 0.5));
-							ArmorStandEditListener.getEventsToIgnore().add(event);
-							Bukkit.getPluginManager().callEvent(event);
-							return event;
-						})
-						.anyMatch(Cancellable::isCancelled);
-			}
-			if (cancel) {
-				armorStands.forEach(armorStand -> part.add(armorStand, -x, -y, -z));
-				return;
-			}
+		if (part == Part.BODY && plugin.isInteractCancelled(thePlayer, armorStands, new Vector(x, y, z))) {
+			return;
 		}
 
 		armorStands.forEach(armorStand -> part.add(armorStand, x, y, z));

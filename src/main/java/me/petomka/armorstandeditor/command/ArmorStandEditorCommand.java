@@ -37,18 +37,18 @@ public class ArmorStandEditorCommand implements TabExecutor {
 		if (args.length >= 1 && args[0].equalsIgnoreCase("off")) {
 			String[] remainingArgs = new String[args.length - 1];
 			if (remainingArgs.length > 0) {
-				System.arraycopy(args, 1, remainingArgs, 0, args.length);
+				System.arraycopy(args, 1, remainingArgs, 0, remainingArgs.length);
 			}
-			onToggle(sender, label, args, false);
+			onToggle(sender, label, remainingArgs, false);
 			return true;
 		}
 
 		if (args.length >= 1 && args[0].equalsIgnoreCase("on")) {
 			String[] remainingArgs = new String[args.length - 1];
 			if (remainingArgs.length > 0) {
-				System.arraycopy(args, 1, remainingArgs, 0, args.length);
+				System.arraycopy(args, 1, remainingArgs, 0, remainingArgs.length);
 			}
-			onToggle(sender, label, args, true);
+			onToggle(sender, label, remainingArgs, true);
 			return true;
 		}
 
@@ -64,13 +64,9 @@ public class ArmorStandEditorCommand implements TabExecutor {
 			return Main.copySubstringMatches(subCommands.keySet(), lastArg);
 		}
 
-		if (args.length >= 2) {
-			return Main.copySubstringMatches(Bukkit.getOnlinePlayers().stream()
-					.map(Player::getName)
-					.collect(Collectors.toList()), lastArg);
-		}
-
-		return Collections.emptyList();
+		return Main.copySubstringMatches(Bukkit.getOnlinePlayers().stream()
+				.map(Player::getName)
+				.collect(Collectors.toList()), lastArg);
 	}
 
 	private void onSyntax(CommandSender sender, String label) {
@@ -124,7 +120,7 @@ public class ArmorStandEditorCommand implements TabExecutor {
 
 		if (!sender.hasPermission(Main.getInstance().getDefaultConfig().getToggleOthersPermission())) {
 			if (args.length != 1 || !args[0].equalsIgnoreCase(sender.getName())) {
-				sender.sendMessage(Main.getInstance().getMessages().getNoPermissionMessage());
+				sender.sendMessage(Main.colorString(Main.getInstance().getMessages().getNoPermissionMessage()));
 				return;
 			}
 		}
@@ -139,8 +135,8 @@ public class ArmorStandEditorCommand implements TabExecutor {
 		for (String name : args) {
 			Player player = Bukkit.getPlayerExact(name);
 			if (player == null) {
-				sender.sendMessage(Main.getInstance().getMessages()
-						.getPlayerNotFound().replace("{name}", name));
+				sender.sendMessage(Main.colorString(Main.getInstance().getMessages()
+						.getPlayerNotFound().replace("{name}", name)));
 				return;
 			}
 			if (!on) {
@@ -148,7 +144,7 @@ public class ArmorStandEditorCommand implements TabExecutor {
 			} else {
 				Main.getInstance().getDisabledPlayersStorage().getDisabledPlayers().remove(player.getUniqueId());
 			}
-			player.sendMessage(msg.replace("{name}", player.getName()));
+			player.sendMessage(Main.colorString(msg.replace("{name}", player.getName())));
 		}
 	}
 

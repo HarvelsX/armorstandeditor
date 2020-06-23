@@ -1,0 +1,27 @@
+armorstandedit.*:
+  description: 'allows full usage of ArmorStandAdjustor, provided permission names haven''t changed.'
+  default: op
+  children:
+    armorstandedit.preset.player: true
+    armorstandedit.reload: true
+    armorstandedit.toggle_others: true
+    armorstandedit.placecopy: true
+    armorstandedit.copy: true
+    armorstandedit.colornametag: true
+    armorstandedit.breakedited: true
+    armorstandedit.flag.invulnerable: true
+    armorstandedit.flag.gravity: true
+    armorstandedit.flag.visibility: true
+    armorstandedit.flag.glowing: true
+    armorstandedit.set_equip: true
+
+armorstandedit.preset.player:
+  description: 'A preset of permissions that normal players can use and should not interfere with normal server activities.'
+  default: false
+  children:
+    armorstandedit.use: true
+    armorstandedit.pro: true
+    armorstandedit.rotateleather: true
+    armorstandedit.flag.show_arms: true
+    armorstandedit.flag.show_base_plate: true
+    armorstandedit.flag.small_armorstand: true

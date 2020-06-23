@@ -62,6 +62,33 @@ public class DefaultConfig extends Config {
 	@Comment("Permission required to break an armorstand that is currently being edited")
 	private String breakEditedArmorStandPermission = "armorstandedit.breakedited";
 
+	@Comment("Whether a user can toggle an armorstand's arms")
+	private String showArmsPermission = "armorstandedit.flag.show_arms";
+
+	@Comment("Whether a user can toggle an armorstand's baseplate")
+	private String showBasePlatePermission = "armorstandedit.flag.show_base_plate";
+
+	@Comment("Whether a user can make an armorstand small")
+	private String smallArmorStandPermission = "armorstandedit.flag.small_armorstand";
+
+	@Comment("Whether a user can make an armorstand invulnerable")
+	private String invulnerableArmorStandPermission = "armorstandedit.flag.invulnerable";
+
+	@Comment("Whether a user can toggle an armorstand's gravity")
+	private String gravityPermission = "armorstandedit.flag.gravity";
+
+	@Comment("Whether a user can toggle an armorstand's visibility")
+	private String visibilityPermission = "armorstandedit.flag.visibility";
+
+	@Comment("Whether a user can toggle an armorstand's custom name")
+	private String customNamePermission = "armorstandedit.flag.custom_name";
+
+	@Comment("Whether a user can toggle an armorstand's glowing effect, also affects pro-mode!")
+	private String glowingPermission = "armorstandedit.flag.glowing";
+
+	@Comment("Whether a user can directly set an armorstand's equipment via gui - does not affect normal equipping.")
+	private String setEquipPermission = "armorstandedit.set_equip";
+
 	@Comment("Wheterh custom armor stands should drop a copy of themselves when they are destroyed")
 	private boolean dropCopyOfDestroyedArmorStand = true;
 

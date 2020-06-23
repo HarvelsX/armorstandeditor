@@ -6,7 +6,7 @@
 
     <groupId>me.petomka</groupId>
     <artifactId>armorstandeditor</artifactId>
-    <version>1.2</version>
+    <version>1.4</version>
 
     <build>
         <plugins>
@@ -92,14 +92,14 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>LATEST</version>
+            <version>1.13.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.16.20</version>
+            <version>1.18.12</version>
             <scope>provided</scope>
         </dependency>
 
@@ -113,8 +113,13 @@
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>LATEST</version>
+            <version>3.0.2</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.unlimitedworld</groupId>
+            <artifactId>uwlibbukkit</artifactId>
+            <version>1.15-SNAPSHOT</version>
         </dependency>
 
     </dependencies>
