@@ -651,77 +651,84 @@ public class ArmorStandEditListener implements Listener {
 		 * 7 -> 1, 7
 		 * 8 -> 3 2*(x // 7) + 1 , 1 ((x - 1) % 7) + 1
 		 * */
-		IntUnaryOperator rowFunction = x -> 2 * Math.floorDiv(x, 7) + 1;
+		IntUnaryOperator rowFunction = x -> 2 * Math.floorDiv(x - 1, 7) + 1;
 		IntUnaryOperator columnFunction = x -> ((x - 1) % 7) + 1;
 
 		//Arms
 		if (player.hasPermission(config.getShowArmsPermission())) {
-			menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_ARMS, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_ARMS, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex), (p, i) -> {
 				armorStand.setArms(!armorStand.hasArms());
 				openArmorStandMenu(player, backHandler);
 				playToggleSound(player);
 			});
-			addBoolItem(menu, 2, 1, armorStand::hasArms);
+			addBoolItem(menu, rowFunction.applyAsInt(menuIndex) + 1, columnFunction.applyAsInt(menuIndex), armorStand::hasArms);
+			menuIndex++;
 		}
 
 		//Baseplate
 		if (player.hasPermission(config.getShowBasePlatePermission())) {
-			menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_BASEPLATE, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_BASEPLATE, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex), (p, i) -> {
 				armorStand.setBasePlate(!armorStand.hasBasePlate());
 				openArmorStandMenu(player, backHandler);
 				playToggleSound(player);
 			});
-			addBoolItem(menu, 2, 2, armorStand::hasBasePlate);
+			addBoolItem(menu, rowFunction.applyAsInt(menuIndex) + 1, columnFunction.applyAsInt(menuIndex), armorStand::hasBasePlate);
+			menuIndex++;
 		}
 
 		//Small Armorstand
 		if (player.hasPermission(config.getSmallArmorStandPermission())) {
-			menu.addItemAndClickHandler(MenuItem.TOGGLE_SMALL_ARMORSTAND, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_SMALL_ARMORSTAND, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex), (p, i) -> {
 				armorStand.setSmall(!armorStand.isSmall());
 				openArmorStandMenu(player, backHandler);
 				playToggleSound(player);
 			});
-			addBoolItem(menu, 2, 3, armorStand::isSmall);
+			addBoolItem(menu, rowFunction.applyAsInt(menuIndex) + 1, columnFunction.applyAsInt(menuIndex), armorStand::isSmall);
+			menuIndex++;
 		}
 
 		//Invulnerability
 		if (player.hasPermission(config.getInvulnerableArmorStandPermission())) {
-			menu.addItemAndClickHandler(MenuItem.TOGGLE_INVULNERABILITY, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_INVULNERABILITY, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex), (p, i) -> {
 				armorStand.setInvulnerable(!armorStand.isInvulnerable());
 				openArmorStandMenu(player, backHandler);
 				playToggleSound(player);
 			});
-			addBoolItem(menu, 2, 4, armorStand::isInvulnerable);
+			addBoolItem(menu, rowFunction.applyAsInt(menuIndex) + 1, columnFunction.applyAsInt(menuIndex), armorStand::isInvulnerable);
+			menuIndex++;
 		}
 
 		//Gravity
 		if (player.hasPermission(config.getGravityPermission())) {
-			menu.addItemAndClickHandler(MenuItem.TOGGLE_GRAVITY, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_GRAVITY, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex), (p, i) -> {
 				armorStand.setGravity(!armorStand.hasGravity());
 				openArmorStandMenu(player, backHandler);
 				playToggleSound(player);
 			});
-			addBoolItem(menu, 2, 5, armorStand::hasGravity);
+			addBoolItem(menu, rowFunction.applyAsInt(menuIndex) + 1, columnFunction.applyAsInt(menuIndex), armorStand::hasGravity);
+			menuIndex++;
 		}
 
 		//Visibility
 		if (player.hasPermission(config.getVisibilityPermission())) {
-			menu.addItemAndClickHandler(MenuItem.TOGGLE_VISIBILITY, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_VISIBILITY, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex), (p, i) -> {
 				armorStand.setVisible(!armorStand.isVisible());
 				openArmorStandMenu(player, backHandler);
 				playToggleSound(player);
 			});
-			addBoolItem(menu, 2, 6, armorStand::isVisible);
+			addBoolItem(menu, rowFunction.applyAsInt(menuIndex) + 1, columnFunction.applyAsInt(menuIndex), armorStand::isVisible);
+			menuIndex++;
 		}
 
 		//Custom name
 		if (player.hasPermission(config.getCustomNamePermission())) {
-			menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_CUSTOM_NAME, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex++), (p, i) -> {
+			menu.addItemAndClickHandler(MenuItem.TOGGLE_SHOW_CUSTOM_NAME, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex), (p, i) -> {
 				armorStand.setCustomNameVisible(!armorStand.isCustomNameVisible());
 				openArmorStandMenu(player, backHandler);
 				playToggleSound(player);
 			});
-			addBoolItem(menu, 2, 7, armorStand::isCustomNameVisible);
+			addBoolItem(menu, rowFunction.applyAsInt(menuIndex) + 1, columnFunction.applyAsInt(menuIndex), armorStand::isCustomNameVisible);
+			menuIndex++;
 		}
 
 		//Glowing
@@ -731,7 +738,8 @@ public class ArmorStandEditListener implements Listener {
 				openArmorStandMenu(player, backHandler);
 				playToggleSound(player);
 			});
-			addBoolItem(menu, 4, 1, armorStand::isGlowing);
+			addBoolItem(menu, rowFunction.applyAsInt(menuIndex) + 1, columnFunction.applyAsInt(menuIndex), armorStand::isGlowing);
+//			menuIndex++;
 		}
 
 		if (player.hasPermission(config.getSetEquipPermission())) {
