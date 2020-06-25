@@ -6,7 +6,7 @@
 
     <groupId>me.petomka</groupId>
     <artifactId>armorstandeditor</artifactId>
-    <version>1.4.1</version>
+    <version>1.4.2</version>
 
     <build>
         <plugins>
@@ -15,8 +15,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>11</source>
-                    <target>11</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <annotationProcessors>
                         <annotationProcessor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor
                         </annotationProcessor>
