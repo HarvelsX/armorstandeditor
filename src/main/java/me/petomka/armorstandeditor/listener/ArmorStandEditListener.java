@@ -3,13 +3,13 @@ package me.petomka.armorstandeditor.listener;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import me.petomka.armorstandeditor.Main;
 import me.petomka.armorstandeditor.config.DefaultConfig;
 import me.petomka.armorstandeditor.config.Messages;
 import me.petomka.armorstandeditor.handler.Accuracy;
 import me.petomka.armorstandeditor.handler.ArmorStandEditHandler;
+import me.petomka.armorstandeditor.handler.AttachedCommandsHandler;
 import me.petomka.armorstandeditor.handler.Part;
 import me.petomka.armorstandeditor.inventory.InventoryMenu;
 import me.petomka.armorstandeditor.inventory.MenuItem;
@@ -19,7 +19,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.*;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -49,14 +52,11 @@ public class ArmorStandEditListener implements Listener {
 
 	private final Main plugin;
 
-	@Getter
-	private static Set<Event> eventsToIgnore = Sets.newHashSet();
-
 	private Map<ArmorStand, Set<UUID>> armorStandDamagers = Maps.newHashMap();
 
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onAtEntityClick(PlayerInteractAtEntityEvent event) {
-		if (eventsToIgnore.remove(event)) {
+		if (Main.getEventsToIgnore().contains(event)) {
 			return;
 		}
 
@@ -410,8 +410,9 @@ public class ArmorStandEditListener implements Listener {
 		if (plugin.isInteractCancelled(player, Collections.singleton(armorStand), new Vector(0, 0, 0))) {
 			return;
 		}
+		AttachedCommandsListener.addIgnoreEvent(event);
 		ItemMeta meta = nameTag.getItemMeta();
-		if (!meta.hasDisplayName()) {
+		if (!meta.hasDisplayName()) { //cannot be null -> Name_tag has item meta (checked)
 			return;
 		}
 		if (player.getGameMode() != GameMode.CREATIVE) {
@@ -478,6 +479,7 @@ public class ArmorStandEditListener implements Listener {
 			armorStand.setLastDamageCause(null);
 			return;
 		}
+		AttachedCommandsHandler.getInstance().removeAll(armorStand.getUniqueId());
 		UUID armorStandEditor = ArmorStandEditHandler.getInstance().getArmorStandEditor(armorStand);
 		if (armorStandEditor == null) {
 			handleDropCopy(event, player, armorStand);
@@ -739,6 +741,14 @@ public class ArmorStandEditListener implements Listener {
 				playToggleSound(player);
 			});
 			addBoolItem(menu, rowFunction.applyAsInt(menuIndex) + 1, columnFunction.applyAsInt(menuIndex), armorStand::isGlowing);
+			menuIndex++;
+		}
+
+		if (player.hasPermission(config.getAttachCommandsPermission())) {
+			menu.addItemAndClickHandler(MenuItem.ATTACH_COMMANDS, rowFunction.applyAsInt(menuIndex), columnFunction.applyAsInt(menuIndex), (p, i) -> {
+				p.closeInventory();
+				p.performCommand("asa commands " + armorStand.getUniqueId() + " actions");
+			});
 //			menuIndex++;
 		}
 

@@ -16,6 +16,7 @@ public class MenuItem {
 	public static ItemStack TOGGLE_VISIBILITY;
 	public static ItemStack TOGGLE_SHOW_CUSTOM_NAME;
 	public static ItemStack TOGGLE_GLOWING;
+	public static ItemStack ATTACH_COMMANDS;
 
 	public static ItemStack SET_EQUIP;
 	public static ItemStack HELMET_SLOT;
@@ -43,6 +44,7 @@ public class MenuItem {
 		TOGGLE_VISIBILITY = InventoryMenu.namedItemStack(Material.GLASS, messages.getInventory_toggleVisibility());
 		TOGGLE_SHOW_CUSTOM_NAME = InventoryMenu.namedItemStack(Material.NAME_TAG, messages.getInventory_toggleShowCustomName());
 		TOGGLE_GLOWING = InventoryMenu.namedItemStack(Material.SEA_LANTERN, messages.getInventory_toggleGlowing());
+		ATTACH_COMMANDS = InventoryMenu.namedItemStack(Material.COMMAND_BLOCK, messages.getInventory_attachCommands());
 
 		SET_EQUIP = InventoryMenu.namedItemStack(Material.IRON_CHESTPLATE, messages.getInventory_setEquip());
 		HELMET_SLOT = InventoryMenu.namedItemStack(Material.LEATHER_HELMET, messages.getInventory_setEquipHelmet());

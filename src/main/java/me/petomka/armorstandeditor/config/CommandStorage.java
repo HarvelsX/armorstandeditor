@@ -1,6 +1,5 @@
 package me.petomka.armorstandeditor.config;
 
-import com.google.common.collect.Sets;
 import lombok.Getter;
 import lombok.Setter;
 import me.petomka.armorstandeditor.Main;
@@ -9,20 +8,21 @@ import net.cubespace.Yamler.Config.ConfigMode;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
 
 import java.io.File;
-import java.util.Set;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@Getter
 @Setter
-public class DisabledPlayersStorage extends Config {
+@Getter
+public class CommandStorage extends Config {
 
-	public DisabledPlayersStorage(Main main) throws InvalidConfigurationException {
-		CONFIG_FILE = new File(main.getDataFolder(), "disabled_players.yml");
+	public CommandStorage(Main plugin) throws InvalidConfigurationException {
+		CONFIG_FILE = new File(plugin.getDataFolder(), "as-commands.yml");
 		CONFIG_MODE = ConfigMode.DEFAULT;
 
 		init();
 	}
 
-	private Set<UUID> disabledPlayers = Sets.newHashSet();
+	private Map<String, List<String>> mappedCommands = new HashMap<>();
 
 }

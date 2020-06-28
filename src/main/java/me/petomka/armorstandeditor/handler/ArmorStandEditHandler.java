@@ -6,14 +6,9 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import lombok.Getter;
 import me.petomka.armorstandeditor.Main;
-import me.petomka.armorstandeditor.listener.ArmorStandEditListener;
-import me.petomka.armorstandeditor.util.EntityLocationProxy;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.player.PlayerInteractAtEntityEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.util.Vector;
 
 import javax.annotation.Nonnull;
@@ -242,6 +237,14 @@ public class ArmorStandEditHandler {
 
 		if (part == Part.BODY && plugin.isInteractCancelled(thePlayer, armorStands, new Vector(x, y, z))) {
 			return;
+		}
+
+		if (part == Part.BODY && plugin.getDefaultConfig().isDisableGravityOnYPositionChange() && y != 0) {
+			if (!thePlayer.hasPermission(plugin.getDefaultConfig().getGravityPermission())) {
+				thePlayer.sendMessage(Main.colorString(plugin.getMessages().getCannotChangeYAxis()));
+				return;
+			}
+			armorStands.forEach(armorStand -> armorStand.setGravity(false));
 		}
 
 		armorStands.forEach(armorStand -> part.add(armorStand, x, y, z));

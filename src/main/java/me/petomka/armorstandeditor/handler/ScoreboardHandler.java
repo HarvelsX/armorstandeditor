@@ -129,7 +129,7 @@ public class ScoreboardHandler {
 		int teamNo = 0;
 
 		Set<ArmorStand> armorStands = ArmorStandEditHandler.getInstance().editedArmorStands.get(player);
-		if (armorStands == null || armorStands.isEmpty() || armorStands.size() > 1) {
+		if (armorStands == null || armorStands.size() != 1) {
 			Main.getInstance().getLogger().log(Level.SEVERE, "Player " + thePlayer.getName() + " does not have " +
 					"exactly one armorstand to edit, but has " + (armorStands == null ? "NULL" : armorStands.size()));
 			return false;

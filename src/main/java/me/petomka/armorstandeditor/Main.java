@@ -3,32 +3,31 @@ package me.petomka.armorstandeditor;
 import com.google.common.base.Preconditions;
 import lombok.Getter;
 import me.petomka.armorstandeditor.command.ArmorStandEditorCommand;
+import me.petomka.armorstandeditor.config.CommandStorage;
 import me.petomka.armorstandeditor.config.DefaultConfig;
 import me.petomka.armorstandeditor.config.DisabledPlayersStorage;
 import me.petomka.armorstandeditor.config.Messages;
 import me.petomka.armorstandeditor.handler.ArmorStandEditHandler;
+import me.petomka.armorstandeditor.handler.AttachedCommandsHandler;
 import me.petomka.armorstandeditor.inventory.InventoryMenu;
 import me.petomka.armorstandeditor.inventory.MenuItem;
 import me.petomka.armorstandeditor.listener.ArmorStandEditListener;
+import me.petomka.armorstandeditor.listener.AttachedCommandsListener;
 import me.petomka.armorstandeditor.listener.PlayerListener;
 import me.petomka.armorstandeditor.util.EntityLocationProxy;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
@@ -41,6 +40,9 @@ public class Main extends JavaPlugin {
 	private static Main instance;
 
 	@Getter
+	private static final Set<Event> eventsToIgnore = new HashSet<>();
+
+	@Getter
 	private Messages messages;
 
 	@Getter
@@ -48,6 +50,9 @@ public class Main extends JavaPlugin {
 
 	@Getter
 	private DisabledPlayersStorage disabledPlayersStorage;
+
+	@Getter
+	private CommandStorage commandStorage;
 
 	@Override
 	public void onEnable() {
@@ -77,7 +82,18 @@ public class Main extends JavaPlugin {
 			return;
 		}
 
+		try {
+			commandStorage = new CommandStorage(this);
+		} catch (InvalidConfigurationException e) {
+			getLogger().log(Level.SEVERE, "Your as-commands.yml is invalid.", e);
+			panic();
+			return;
+		}
+
+		AttachedCommandsHandler.init(this);
+
 		new ArmorStandEditHandler(this);
+		new AttachedCommandsListener(this);
 
 		PluginManager manager = Bukkit.getPluginManager();
 		manager.registerEvents(new ArmorStandEditListener(this), this);
@@ -113,15 +129,17 @@ public class Main extends JavaPlugin {
 
 	public boolean isInteractCancelled(Player player, Collection<ArmorStand> entities, Vector delta) {
 		double x = delta.getX(), y = delta.getY(), z = delta.getZ();
-		return entities.stream()
+		boolean cancelled = entities.stream()
 				.map(as -> {
 					EntityLocationProxy proxy = new EntityLocationProxy(as, as.getLocation().add(x, y, z));
 					PlayerInteractEntityEvent event = new PlayerInteractEntityEvent(player, proxy);
-					ArmorStandEditListener.getEventsToIgnore().add(event);
+					getEventsToIgnore().add(event);
 					Bukkit.getPluginManager().callEvent(event);
 					return event;
 				})
 				.anyMatch(Cancellable::isCancelled);
+		getEventsToIgnore().clear();
+		return cancelled;
 	}
 
 	public static String colorString(String s) {

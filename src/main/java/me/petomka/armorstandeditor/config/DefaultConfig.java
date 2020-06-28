@@ -89,6 +89,9 @@ public class DefaultConfig extends Config {
 	@Comment("Whether a user can directly set an armorstand's equipment via gui - does not affect normal equipping.")
 	private String setEquipPermission = "armorstandedit.set_equip";
 
+	@Comment("Whether a user can modify the commands attached to an armor stand.")
+	private String attachCommandsPermission = "armorstandedit.attach_commands";
+
 	@Comment("Wheterh custom armor stands should drop a copy of themselves when they are destroyed")
 	private boolean dropCopyOfDestroyedArmorStand = true;
 
@@ -103,6 +106,10 @@ public class DefaultConfig extends Config {
 
 	@Comment("Provide audio feedback for actions")
 	private boolean playSounds = true;
+
+	@Comment("Whether an armor stands gravity should automatically be disabled on Y axis change. If true, users\n" +
+			"# without the permission to disable the gravity will not be able to move the armor stand on the y axis.")
+	private boolean disableGravityOnYPositionChange = true;
 
 	//Comment added manually in constructor
 	@Path("bossBarColor")

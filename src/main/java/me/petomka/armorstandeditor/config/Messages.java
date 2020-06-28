@@ -46,6 +46,44 @@ public class Messages extends Config {
 
 	private String proModeGlowingNotAllowed = "&cSorry, but you are not allowed to toggle glowing effect.";
 
+	private String cannotChangeYAxis = "&cSorry, but you are not allowed to move the armorstand along the y axis.";
+
+	private String entityIsNotArmorStand = "&cThe provided entity is invalid or not an Armor Stand.";
+
+	private String commands_addedCommand = "&aThe command was successfully appended.";
+
+	private String commands_removedCommand = "&aThe command was successfully removed.";
+
+	private String commands_invalidCommand = "&cThis command does not exist.";
+
+	private String commands_updatedCommand = "&aSuccessfully updated the command.";
+
+	private String commands_insertedCommand = "&aSuccessfully inserted the command.";
+
+	private String commands_removedAll = "&aAll commands were removed from this armorstand.";
+
+	@Comment("The headline of the list. <armorstand> will be replaced by the armor stand's custom name (if set) or uuid.")
+	private String commands_list_head = "&6Attached commands to <armorstand>";
+
+	private String commands_list_none = "&cNone";
+
+	@Comment("List entry. <index> will be replaced by the respective index, <command> by the command line")
+	private String commands_list_entry = "&7<index>: &f<command>";
+
+	private String commands_actions_head = "&6What do you want to do? (Click an option)";
+
+	private String commands_actions_add = "&2Add a command";
+
+	private String commands_actions_remove = "&2Remove a command";
+
+	private String commands_actions_update = "&2Update a command";
+
+	private String commands_insert = "&2Insert a command before another command";
+
+	private String commands_actions_list = "&2View all commands";
+
+	private String commands_actions_removeAll = "&2Remove &call &2commands";
+
 	@Comment("Name for each part")
 	private String headName = "head";
 	private String leftArmName = "left arm";
@@ -66,7 +104,7 @@ public class Messages extends Config {
 
 	@Comment("What the BossBar displaying the adjustment size should say")
 	private String bossBarTitle = "&6Current adjustment size: {size}";
-
+	
 	private String smallestAdjustmentName = "smallest (0.01)";
 	private String smallerAdjustmentName = "smaller (0.05)";
 	private String smallAdjustmentName = "small (0.1)";
@@ -88,6 +126,7 @@ public class Messages extends Config {
 	private String inventory_toggleVisibility = "&6Visible";
 	private String inventory_toggleShowCustomName = "&6Show custom name";
 	private String inventory_toggleGlowing = "&6Glowing";
+	private String inventory_attachCommands = "&6Manage commands";
 	private String inventory_setEquip = "&6Set equipment";
 	private String inventory_setEquipHelmet = "&6Helmet";
 	private String inventory_setEquipChest = "&6Chestplate";
