@@ -60,11 +60,16 @@ public class ArmorStandEditListener implements Listener {
 			return;
 		}
 
-		if (Main.getInstance().getDisabledPlayersStorage().getDisabledPlayers().contains(event.getPlayer().getUniqueId())) {
+		if (event.getRightClicked().getType() != EntityType.ARMOR_STAND) {
 			return;
 		}
 
-		if (event.getRightClicked().getType() != EntityType.ARMOR_STAND) {
+		ArmorStand armorStand = (ArmorStand) event.getRightClicked();
+		if (ArmorStandEditHandler.getInstance().getArmorStandEditor(armorStand) != null) {
+			event.setCancelled(true); // If an armorstand is being edited, cancel interactions with it, always.
+		}
+
+		if (Main.getInstance().getDisabledPlayersStorage().getDisabledPlayers().contains(event.getPlayer().getUniqueId())) {
 			return;
 		}
 
@@ -83,7 +88,7 @@ public class ArmorStandEditListener implements Listener {
 			}
 			if (ArmorStandEditHandler.getInstance().isProModeEditor(event.getPlayer().getUniqueId())) {
 				ArmorStandEditHandler.getInstance().getSingleArmorstand(event.getPlayer().getUniqueId())
-						.ifPresent(armorStand -> openArmorStandMenu(event.getPlayer(), null));
+						.ifPresent(as -> openArmorStandMenu(event.getPlayer(), null));
 			}
 			return;
 		}
@@ -104,8 +109,6 @@ public class ArmorStandEditListener implements Listener {
 		if (hand != null) {
 			proMode = hand.getType() == Material.STICK;
 		}
-
-		ArmorStand armorStand = (ArmorStand) event.getRightClicked();
 		ArmorStandEditHandler.getInstance().addEditingPlayer(event.getPlayer().getUniqueId(),
 				calculateClickedPart(event.getClickedPosition(), armorStand), armorStand);
 
