@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import lombok.Getter;
 import me.petomka.armorstandeditor.Main;
+import me.petomka.armorstandeditor.inventory.InventoryMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
@@ -132,6 +133,14 @@ public class ArmorStandEditHandler {
 		//editing accuracy will be preserved
 		editedArmorStands.remove(player);
 		proEditors.remove(player);
+
+		if (InventoryMenu.getOpenedInventories().get(player) != null) {
+			Player thePlayer = Bukkit.getPlayer(player);
+			if (thePlayer != null) {
+				thePlayer.closeInventory();
+			}
+		}
+
 		return editingPlayers.remove(player) != null;
 	}
 

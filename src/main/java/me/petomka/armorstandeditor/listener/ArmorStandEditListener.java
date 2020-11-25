@@ -27,6 +27,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
@@ -65,8 +66,10 @@ public class ArmorStandEditListener implements Listener {
 		}
 
 		ArmorStand armorStand = (ArmorStand) event.getRightClicked();
-		if (ArmorStandEditHandler.getInstance().getArmorStandEditor(armorStand) != null) {
-			event.setCancelled(true); // If an armorstand is being edited, cancel interactions with it, always.
+		UUID armorStandEditor = ArmorStandEditHandler.getInstance().getArmorStandEditor(armorStand);
+		if (armorStandEditor != null && !armorStandEditor.equals(event.getPlayer().getUniqueId())) {
+			event.setCancelled(true); // If an armorstand is being edited, cancel foreign interactions with it, always.
+			return;
 		}
 
 		if (Main.getInstance().getDisabledPlayersStorage().getDisabledPlayers().contains(event.getPlayer().getUniqueId())) {
@@ -246,6 +249,18 @@ public class ArmorStandEditListener implements Listener {
 		handleArmorStandLeftClick(event, (Player) event.getDamager(), (ArmorStand) event.getEntity());
 	}
 
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onEntityDeath(EntityDeathEvent event) {
+		if (!(event.getEntity() instanceof ArmorStand)) {
+			return;
+		}
+		UUID playerId = ArmorStandEditHandler.getInstance().getArmorStandEditor((ArmorStand) event.getEntity());
+		if (playerId == null) {
+			return;
+		}
+		ArmorStandEditHandler.getInstance().removeEditingPlayer(playerId);
+	}
+
 	@EventHandler(priority = EventPriority.NORMAL)
 	public void onBuild(BlockPlaceEvent event) {
 		if (ArmorStandEditHandler.getInstance().isProModeEditor(event.getPlayer().getUniqueId())) {
@@ -390,33 +405,31 @@ public class ArmorStandEditListener implements Listener {
 		}
 		switch (hand.getType()) {
 			case NAME_TAG:
-				handleNameTagRename(event, player, armorStand);
-				break;
+				return handleNameTagRename(event, player, armorStand);
 			case LEATHER:
-				handleLeatherRotate(event, player, armorStand, false);
-				break;
+				return handleLeatherRotate(event, player, armorStand, false);
 		}
-		return event.isCancelled();
+		return false;
 	}
 
-	private void handleNameTagRename(Cancellable event, Player player, ArmorStand armorStand) {
+	private boolean handleNameTagRename(Cancellable event, Player player, ArmorStand armorStand) {
 		ItemStack nameTag = player.getInventory().getItemInMainHand();
 		if (nameTag == null) {
-			return;
+			return false;
 		}
 		if (nameTag.getType() != Material.NAME_TAG) {
-			return;
+			return false;
 		}
 		if (!player.hasPermission(Main.getInstance().getDefaultConfig().getColorNameTagsPermission())) {
-			return;
+			return false;
 		}
 		if (plugin.isInteractCancelled(player, Collections.singleton(armorStand), new Vector(0, 0, 0))) {
-			return;
+			return false;
 		}
 		AttachedCommandsListener.addIgnoreEvent(event);
 		ItemMeta meta = nameTag.getItemMeta();
 		if (!meta.hasDisplayName()) { //cannot be null -> Name_tag has item meta (checked)
-			return;
+			return false;
 		}
 		if (player.getGameMode() != GameMode.CREATIVE) {
 			nameTag.setAmount(nameTag.getAmount() - 1);
@@ -426,6 +439,7 @@ public class ArmorStandEditListener implements Listener {
 			armorStand.setCustomName(name);
 		}, 1L);
 		event.setCancelled(true);
+		return true;
 	}
 
 	private void handleArmorStandLeftClick(Cancellable event, Player player, ArmorStand armorStand) {
@@ -522,12 +536,12 @@ public class ArmorStandEditListener implements Listener {
 		armorStandDamagers.remove(armorStand);
 	}
 
-	private void handleLeatherRotate(Cancellable event, Player player, ArmorStand armorStand, boolean clockWise) {
+	private boolean handleLeatherRotate(Cancellable event, Player player, ArmorStand armorStand, boolean clockWise) {
 		if (!player.hasPermission(Main.getInstance().getDefaultConfig().getRotateLeatherPermission())) {
-			return;
+			return false;
 		}
 		if (plugin.isInteractCancelled(player, Collections.singleton(armorStand), new Vector(0, 0, 0))) {
-			return;
+			return false;
 		}
 		event.setCancelled(true);
 
@@ -540,6 +554,7 @@ public class ArmorStandEditListener implements Listener {
 		Location location = armorStand.getLocation();
 		location.setYaw(location.getYaw() + angle);
 		armorStand.teleport(location);
+		return true;
 	}
 
 

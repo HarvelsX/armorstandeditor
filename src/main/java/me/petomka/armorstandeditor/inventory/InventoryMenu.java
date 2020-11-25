@@ -25,8 +25,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -34,6 +36,9 @@ public class InventoryMenu implements Listener {
 
 	private static final ItemStack DEFAULT_ITEM = hideDisplayName(new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE));
 	private static final ItemStack DARK_ITEM = hideDisplayName(new ItemStack(Material.BLACK_STAINED_GLASS_PANE));
+
+	@Getter
+	private static final Map<UUID, InventoryMenu> openedInventories = new HashMap<>();
 
 	private static final Set<InventoryAction> LEGIT_ACTIONS = ImmutableSet.of(
 			InventoryAction.PICKUP_ALL,
@@ -103,7 +108,7 @@ public class InventoryMenu implements Listener {
 		Preconditions.checkNotNull(title, "title");
 		Preconditions.checkArgument(rows <= 6, "Only 6 rows are possible!");
 
-		if(defaultClickHandler == null) {
+		if (defaultClickHandler == null) {
 			defaultClickHandler = (player, itemStack) -> this.unlock();
 		}
 
@@ -153,7 +158,9 @@ public class InventoryMenu implements Listener {
 		if (!event.getInventory().equals(inventory)) {
 			return;
 		}
+		locked = true;
 		HandlerList.unregisterAll(this);
+		openedInventories.remove(event.getPlayer().getUniqueId());
 		if (closeHandler != null) {
 			Bukkit.getScheduler().runTaskLater(Main.getInstance(), closeHandler, 1L);
 		}
@@ -161,6 +168,7 @@ public class InventoryMenu implements Listener {
 
 	public void open(Player player) {
 		player.openInventory(inventory);
+		openedInventories.put(player.getUniqueId(), this);
 	}
 
 	public void fillBorder() {
