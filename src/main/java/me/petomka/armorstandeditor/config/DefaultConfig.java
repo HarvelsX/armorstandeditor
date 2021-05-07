@@ -111,6 +111,9 @@ public class DefaultConfig extends Config {
 			"# without the permission to disable the gravity will not be able to move the armor stand on the y axis.")
 	private boolean disableGravityOnYPositionChange = true;
 
+	@Comment("The maximum distance an armorstand will be able to be moved away from the editor")
+	private float maximumEditDistance = 5.f;
+
 	//Comment added manually in constructor
 	@Path("bossBarColor")
 	private String bossBarColor = BarColor.RED.name();

@@ -142,6 +142,21 @@ public class Main extends JavaPlugin {
 		return cancelled;
 	}
 
+	public boolean willBeTooFar(Player player, Collection<ArmorStand> entities, Vector delta) {
+		Vector playerVector = player.getLocation().toVector();
+
+		double maxDist = defaultConfig.getMaximumEditDistance();
+		double maxDistSquared = maxDist * maxDist;
+
+		return entities.stream()
+				.map(armorStand -> armorStand.getLocation().toVector())
+				.anyMatch(vector -> {
+					double preDist = vector.distanceSquared(playerVector);
+					double postDist = vector.add(delta).distanceSquared(playerVector);
+					return postDist > preDist && postDist > maxDistSquared;
+				});
+	}
+
 	public static String colorString(String s) {
 		return ChatColor.translateAlternateColorCodes('&', s);
 	}

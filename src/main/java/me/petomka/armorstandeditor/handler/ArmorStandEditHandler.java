@@ -244,6 +244,10 @@ public class ArmorStandEditHandler {
 			return;
 		}
 
+		if (part == Part.BODY && plugin.willBeTooFar(thePlayer, armorStands, new Vector(x, y, z))) {
+			return;
+		}
+
 		if (part == Part.BODY && plugin.isInteractCancelled(thePlayer, armorStands, new Vector(x, y, z))) {
 			return;
 		}
