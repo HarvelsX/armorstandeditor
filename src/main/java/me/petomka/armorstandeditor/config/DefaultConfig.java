@@ -53,6 +53,9 @@ public class DefaultConfig extends Config {
 	@Comment("Permission required to create a copy of an armor stand in the gui")
 	private String copyArmorStandPermission = "armorstandedit.copy";
 
+	@Comment("Permission similar to the above, but does not allow for GUI copies, just for dropping copies when destroyed.")
+	private String dropCopyArmorStandPermission = "armorstandedit.drop_copy";
+
 	@Comment("Permission required to give a colored name to an armorstand with a nametag")
 	private String colorNameTagsPermission = "armorstandedit.colornametag";
 
@@ -92,7 +95,7 @@ public class DefaultConfig extends Config {
 	@Comment("Whether a user can modify the commands attached to an armor stand.")
 	private String attachCommandsPermission = "armorstandedit.attach_commands";
 
-	@Comment("Wheterh custom armor stands should drop a copy of themselves when they are destroyed")
+	@Comment("Whether custom armor stands should drop a copy of themselves when they are destroyed")
 	private boolean dropCopyOfDestroyedArmorStand = true;
 
 	@Comment("Angle to rotate armor stand in when clicked with leather")

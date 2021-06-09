@@ -520,7 +520,9 @@ public class ArmorStandEditListener implements Listener {
 		if (!Main.getInstance().getDefaultConfig().isDropCopyOfDestroyedArmorStand()) {
 			return;
 		}
-		if (!player.hasPermission(Main.getInstance().getDefaultConfig().getCopyArmorStandPermission())) {
+		boolean canCopy = player.hasPermission(Main.getInstance().getDefaultConfig().getCopyArmorStandPermission());
+		boolean canDropCopy = player.hasPermission(Main.getInstance().getDefaultConfig().getDropCopyArmorStandPermission());
+		if (!canCopy && !canDropCopy) {
 			return;
 		}
 		if (!ArmorStandUtils.isCopyWorthIt(armorStand)) {

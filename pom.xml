@@ -6,7 +6,7 @@
 
     <groupId>me.petomka</groupId>
     <artifactId>armorstandeditor</artifactId>
-    <version>1.5.4</version>
+    <version>1.5.5</version>
 
     <build>
         <plugins>
