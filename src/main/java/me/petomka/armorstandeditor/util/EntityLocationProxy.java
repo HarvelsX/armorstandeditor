@@ -9,12 +9,14 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Pose;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
@@ -466,4 +468,58 @@ public class EntityLocationProxy implements Entity {
 		originalEntity.setCustomName(s);
 	}
 
+	@Override
+	public boolean isInWater() {
+		return originalEntity.isInWater();
+	}
+
+	@Override
+	public void setVisualFire(boolean fire) {
+		originalEntity.setVisualFire(fire);
+	}
+
+	@Override
+	public boolean isVisualFire() {
+		return originalEntity.isVisualFire();
+	}
+
+	@Override
+	public int getFreezeTicks() {
+		return originalEntity.getFreezeTicks();
+	}
+
+	@Override
+	public int getMaxFreezeTicks() {
+		return originalEntity.getMaxFreezeTicks();
+	}
+
+	@Override
+	public void setFreezeTicks(int ticks) {
+		originalEntity.setFreezeTicks(ticks);
+	}
+
+	@Override
+	public boolean isFrozen() {
+		return originalEntity.isFrozen();
+	}
+
+	@Override
+	public Pose getPose() {
+		return originalEntity.getPose();
+	}
+
+	@Override
+	public void sendMessage(UUID sender, String message) {
+		originalEntity.sendMessage(sender, message);
+	}
+
+	@Override
+	public void sendMessage(UUID sender, String... messages) {
+		originalEntity.sendMessage(sender, messages);
+	}
+
+	@Override
+	public PersistentDataContainer getPersistentDataContainer() {
+		return originalEntity.getPersistentDataContainer();
+	}
 }
