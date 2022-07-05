@@ -6,14 +6,7 @@
 
     <groupId>me.petomka</groupId>
     <artifactId>armorstandeditor</artifactId>
-    <version>1.6</version>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>apache.snapshots</id>
-            <url>https://repository.apache.org/snapshots/</url>
-        </pluginRepository>
-    </pluginRepositories>
+    <version>1.7</version>
 
     <build>
         <plugins>
@@ -33,7 +26,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.2</version>
+                <version>3.2.0</version>
                 <configuration>
                     <finalName>ArmorStandAdjustor-${project.version}</finalName>
                 </configuration>
@@ -41,7 +34,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.3.0-SNAPSHOT</version>
+                <version>3.3.0</version>
                 <configuration>
                     <!-- put your configurations here -->
                 </configuration>

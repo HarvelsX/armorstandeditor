@@ -92,6 +92,9 @@ public class DefaultConfig extends Config {
 	@Comment("Whether a user can directly set an armorstand's equipment via gui - does not affect normal equipping.")
 	private String setEquipPermission = "armorstandedit.set_equip";
 
+	@Comment("Whether a user can modify an armor stand's equipment locks")
+	private String setEquipLocksPermission = "armorstandedit.set_equip_locks";
+
 	@Comment("Whether a user can modify the commands attached to an armor stand.")
 	private String attachCommandsPermission = "armorstandedit.attach_commands";
 

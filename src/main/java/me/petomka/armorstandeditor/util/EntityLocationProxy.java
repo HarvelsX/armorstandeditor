@@ -10,6 +10,7 @@ import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Pose;
+import org.bukkit.entity.SpawnCategory;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.MetadataValue;
@@ -506,6 +507,11 @@ public class EntityLocationProxy implements Entity {
 	@Override
 	public Pose getPose() {
 		return originalEntity.getPose();
+	}
+
+	@Override
+	public SpawnCategory getSpawnCategory() {
+		return SpawnCategory.MISC;
 	}
 
 	@Override

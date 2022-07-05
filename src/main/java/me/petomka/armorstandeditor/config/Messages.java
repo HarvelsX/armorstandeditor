@@ -137,6 +137,13 @@ public class Messages extends Config {
 	private String inventory_createCopy = "&6Create copy";
 	private String inventory_enabledName = "&aEnabled";
 	private String inventory_disabledName = "&cDisabled";
+	private String inventory_equipLock_menuItem = "&6Set equipment locks";
+	private String inventory_equipLock_title = "&2ArmorStand Equipment Locks";
+	private String inventory_equipLock_adding = "&6Adding";
+	private String inventory_equipLock_addingChanging = "&6Adding or changing";
+	private String inventory_equipLock_removingChanging = "&6Removing or changing";
+	private String inventory_equipLock_locked = "&clocked";
+	private String inventory_equipLock_unlocked = "&aunlocked";
 
 	private String copiedArmorStandItemName = "&rCopy of {name}";
 	private String copyDefaultName = "Armorstand";

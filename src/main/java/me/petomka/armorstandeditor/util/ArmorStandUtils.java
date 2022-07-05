@@ -12,6 +12,7 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -137,6 +138,13 @@ public class ArmorStandUtils {
             }
             if (equipment.getItemInOffHand() != null) {
                 setByteArray(dataContainer, "itemInOffHand", serializeBukkitObject(equipment.getItemInOffHand()));
+            }
+        }
+
+        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+            for (ArmorStand.LockType lockType : ArmorStand.LockType.values()) {
+                boolean locked = armorStand.hasEquipmentLock(equipmentSlot, lockType);
+                setBoolean(dataContainer, getLockTypeKey(equipmentSlot, lockType), locked);
             }
         }
 
@@ -270,6 +278,21 @@ public class ArmorStandUtils {
                 equipment.setItemInOffHand((ItemStack) deserializeBukkitObject(getByteArray(dataContainer, "itemInOffHand")));
             }
         }
+
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            for (ArmorStand.LockType lockType : ArmorStand.LockType.values()) {
+                boolean locked = getBoolean(dataContainer, getLockTypeKey(slot, lockType));
+                if (locked) {
+                    armorStand.addEquipmentLock(slot, lockType);
+                } else {
+                    armorStand.removeEquipmentLock(slot, lockType);
+                }
+            }
+        }
+    }
+
+    private String getLockTypeKey(EquipmentSlot slot, ArmorStand.LockType lockType) {
+        return slot.name() + "." + lockType.name();
     }
 
     private byte[] serializeEulerAngle(EulerAngle angle) {

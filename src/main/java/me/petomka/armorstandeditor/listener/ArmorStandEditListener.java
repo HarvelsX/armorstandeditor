@@ -29,6 +29,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -38,10 +39,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.util.Vector;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
@@ -779,6 +777,13 @@ public class ArmorStandEditListener implements Listener {
 			});
 		}
 
+		if (player.hasPermission(config.getSetEquipLocksPermission())) {
+			menu.addItemAndClickHandler(MenuItem.CHANGE_EQUIP_LOCKS, 4, 5, (p, i) -> {
+				openEquipLockMenu(player, () -> openArmorStandMenu(player, backHandler), armorStand);
+				playClickSound(player);
+			});
+		}
+
 		if (player.hasPermission(Main.getInstance().getDefaultConfig().getCopyArmorStandPermission())) {
 			menu.addItemAndClickHandler(MenuItem.CREATE_COPY, 4, 7, (p, i) -> {
 				openArmorStandMenu(player, backHandler);
@@ -870,6 +875,56 @@ public class ArmorStandEditListener implements Listener {
 			armorStand.setItemInHand(inventory.getItem(18 + 5));
 			armorStand.getEquipment().setItemInOffHand(inventory.getItem(27 + 5));
 		});
+
+		menu.open(player);
+	}
+
+	private void openEquipLockMenu(Player player, Runnable backHandler, ArmorStand armorStand) {
+		InventoryMenu menu = new InventoryMenu(
+				Main.colorString(Main.getInstance().getMessages().getInventory_equipLock_title()),
+				6,
+				(BiConsumer<Player, ItemStack>) null,
+				backHandler
+		);
+		menu.fill(MenuItem.GLASS_DARK);
+		menu.addBackDoor();
+
+		menu.addItemAndClickHandler(MenuItem.HELMET_SLOT, 0, 2, null);
+		menu.addItemAndClickHandler(MenuItem.CHEST_SLOT, 1, 2, null);
+		menu.addItemAndClickHandler(MenuItem.LEG_SLOT, 2, 2, null);
+		menu.addItemAndClickHandler(MenuItem.BOOTS_SLOT, 3, 2, null);
+		menu.addItemAndClickHandler(MenuItem.MAINHAND_SLOT, 4, 2, null);
+		menu.addItemAndClickHandler(MenuItem.OFFHAND_SLOT, 5, 2, null);
+
+		List<EquipmentSlot> orderedEquipmentSlots = List.of(
+				EquipmentSlot.HEAD,
+				EquipmentSlot.CHEST,
+				EquipmentSlot.LEGS,
+				EquipmentSlot.FEET,
+				EquipmentSlot.HAND,
+				EquipmentSlot.OFF_HAND
+		);
+
+		int colOffset = 0;
+		int rowOffset = 0;
+		for (EquipmentSlot equipmentSlot : orderedEquipmentSlots) {
+			for (ArmorStand.LockType lockType : ArmorStand.LockType.values()) {
+				ItemStack lockItem = MenuItem.getEquipLockItem(armorStand, equipmentSlot, lockType);
+				menu.addItemAndClickHandler(lockItem, rowOffset, colOffset + 3, (player1, itemStack) -> {
+					boolean hasLock = armorStand.hasEquipmentLock(equipmentSlot, lockType);
+					if (hasLock) {
+						armorStand.removeEquipmentLock(equipmentSlot, lockType);
+					} else {
+						armorStand.addEquipmentLock(equipmentSlot, lockType);
+					}
+					playToggleSound(player);
+					openEquipLockMenu(player, backHandler, armorStand);
+				});
+				colOffset++;
+			}
+			colOffset = 0;
+			rowOffset++;
+		}
 
 		menu.open(player);
 	}
