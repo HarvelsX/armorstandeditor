@@ -41,7 +41,7 @@ public class ArmorStandUtils {
     }
 
     private static boolean getBoolean(PersistentDataContainer container, String key) {
-        return container.get(key(key), PersistentDataType.BYTE) != 0;
+        return container.getOrDefault(key(key), PersistentDataType.BYTE, (byte) 0) != 0;
     }
 
     private static void setByteArray(PersistentDataContainer container, String key, byte[] value) {
@@ -57,7 +57,7 @@ public class ArmorStandUtils {
     }
 
     private static double getDouble(PersistentDataContainer container, String key) {
-        return container.get(key(key), PersistentDataType.DOUBLE);
+        return container.getOrDefault(key(key), PersistentDataType.DOUBLE, 0.);
     }
 
     private static void setString(PersistentDataContainer container, String key, String value) {
