@@ -69,10 +69,6 @@ public class ArmorStandSearchListener implements Listener, Runnable {
         if (itemStack.getType() != SEARCH_ITEM) {
             return;
         }
-        String permission = main.getDefaultConfig().getArmorStandSearchPermission();
-        if (!event.getPlayer().hasPermission(permission)) {
-            return;
-        }
         event.setCancelled(true);
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             enableSearch(event.getPlayer());
@@ -167,6 +163,10 @@ public class ArmorStandSearchListener implements Listener, Runnable {
     }
 
     private void enableSearch(Player player) {
+        String permission = main.getDefaultConfig().getArmorStandSearchPermission();
+        if (!player.hasPermission(permission)) {
+            return;
+        }
         if (ArmorStandEditHandler.getInstance().isSearchingPlayer(player.getUniqueId())) {
             return;
         }
