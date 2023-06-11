@@ -12,10 +12,13 @@ import me.petomka.armorstandeditor.handler.AttachedCommandsHandler;
 import me.petomka.armorstandeditor.inventory.InventoryMenu;
 import me.petomka.armorstandeditor.inventory.MenuItem;
 import me.petomka.armorstandeditor.listener.ArmorStandEditListener;
+import me.petomka.armorstandeditor.listener.ArmorStandSearchListener;
 import me.petomka.armorstandeditor.listener.AttachedCommandsListener;
 import me.petomka.armorstandeditor.listener.PlayerListener;
 import me.petomka.armorstandeditor.util.EntityLocationProxy;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
+import org.bstats.MetricsBase;
+import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.ArmorStand;
@@ -35,6 +38,8 @@ import java.util.stream.Collectors;
 public class Main extends JavaPlugin {
 
 	public static final int PRO_MODE_SLOT = 4;
+
+	public static final int BSTATS_PLUGIN_ID = 18728;
 
 	@Getter
 	private static Main instance;
@@ -95,14 +100,19 @@ public class Main extends JavaPlugin {
 		new ArmorStandEditHandler(this);
 		new AttachedCommandsListener(this);
 
+		var searchListener = new ArmorStandSearchListener(this);
 		PluginManager manager = Bukkit.getPluginManager();
 		manager.registerEvents(new ArmorStandEditListener(this), this);
 		manager.registerEvents(new PlayerListener(), this);
+		manager.registerEvents(searchListener, this);
+		searchListener.scheduleTask();
 
 		getCommand("armorstandeditor").setExecutor(new ArmorStandEditorCommand());
 
 		InventoryMenu.reloadItemNames();
 		MenuItem.reloadMenuItems();
+
+		Metrics metrics = new Metrics(this, BSTATS_PLUGIN_ID);
 	}
 
 	@Override

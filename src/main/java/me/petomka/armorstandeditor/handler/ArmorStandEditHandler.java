@@ -8,6 +8,7 @@ import lombok.Getter;
 import me.petomka.armorstandeditor.Main;
 import me.petomka.armorstandeditor.inventory.InventoryMenu;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -18,253 +19,341 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
+import static me.petomka.armorstandeditor.util.ArmorStandUtils.handleLockedArmorStand;
+
 public class ArmorStandEditHandler {
 
-	@Getter
-	private static ArmorStandEditHandler instance;
+    @Getter
+    private static ArmorStandEditHandler instance;
 
-	private ActionBarTask actionBarTask = new ActionBarTask();
+    private ActionBarTask actionBarTask = new ActionBarTask();
 
-	private Main plugin;
+    private Main plugin;
 
-	public ArmorStandEditHandler(Main main) {
-		instance = this;
-		this.plugin = main;
+    public ArmorStandEditHandler(Main main) {
+        instance = this;
+        this.plugin = main;
 
-		actionBarTask.runTaskTimerAsynchronously(main, 30L, 30L);
-	}
+        actionBarTask.runTaskTimerAsynchronously(main, 30L, 30L);
+    }
 
-	private Set<UUID> proEditors = Sets.newHashSet();
-	Map<UUID, Part> editingPlayers = Maps.newHashMap();
-	Map<UUID, Set<ArmorStand>> editedArmorStands = Maps.newHashMap();
-	Map<UUID, Accuracy> editingAccuracy = Maps.newHashMap();
+    private Set<UUID> proEditors = Sets.newHashSet();
+    Map<UUID, Part> editingPlayers = Maps.newHashMap();
+    Map<UUID, Set<ArmorStand>> editedArmorStands = Maps.newHashMap();
+    Map<UUID, Accuracy> editingAccuracy = Maps.newHashMap();
+    Map<UUID, Vector> playerLockedAxis = Maps.newHashMap();
+    Map<UUID, Collection<ArmorStand>> searchingPlayers = Maps.newHashMap();
 
-	public boolean isEditingPlayer(@Nullable UUID player) {
-		return editingPlayers.containsKey(player);
-	}
+    public boolean isEditingPlayer(@Nullable UUID player) {
+        return editingPlayers.containsKey(player);
+    }
 
-	public boolean isProModeEditor(@Nullable UUID player) {
-		if (!isEditingPlayer(player)) {
-			return false;
-		}
-		return proEditors.contains(player);
-	}
+    public boolean isSearchingPlayer(@Nullable UUID player) {
+        return searchingPlayers.containsKey(player);
+    }
 
-	/**
-	 * Toggles pro mode
-	 *
-	 * @param player UUID of the target player
-	 * @return true if player is now in pro mode, false otherwise
-	 */
-	public boolean toggleProMode(@Nonnull UUID player) {
-		Preconditions.checkNotNull(player, "player");
-		if (proEditors.add(player)) {
-			return true;
-		}
-		proEditors.remove(player);
-		return false;
-	}
+    public boolean isProModeEditor(@Nullable UUID player) {
+        if (!isEditingPlayer(player)) {
+            return false;
+        }
+        return proEditors.contains(player);
+    }
 
-	public @Nullable
-	Part getEditingPart(@Nonnull UUID player) {
-		Preconditions.checkNotNull(player, "player");
+    /**
+     * Toggles pro mode
+     *
+     * @param player UUID of the target player
+     * @return true if player is now in pro mode, false otherwise
+     */
+    public boolean toggleProMode(@Nonnull UUID player) {
+        Preconditions.checkNotNull(player, "player");
+        if (proEditors.add(player)) {
+            return true;
+        }
+        proEditors.remove(player);
+        return false;
+    }
 
-		return editingPlayers.get(player);
-	}
+    public @Nullable
+    Part getEditingPart(@Nonnull UUID player) {
+        Preconditions.checkNotNull(player, "player");
 
-	public void addEditingPlayer(@Nonnull UUID player, @Nonnull Part part, @Nonnull ArmorStand armorStand) {
-		Preconditions.checkNotNull(armorStand, "armorStand");
+        return editingPlayers.get(player);
+    }
 
-		addEditingPlayer(player, part, Collections.singleton(armorStand));
-	}
+    public void addSearchingPlayer(@Nonnull UUID player, @Nonnull Collection<ArmorStand> armorStands) {
+        Preconditions.checkNotNull(player, "player");
+        searchingPlayers.put(player, armorStands);
 
-	public void addEditingPlayer(@Nonnull UUID player, @Nonnull Part part, @Nonnull Set<ArmorStand> armorStands) {
-		Preconditions.checkNotNull(player, "player");
-		Preconditions.checkNotNull(part, "part");
-		Preconditions.checkNotNull(armorStands, "armorStands");
+        if (Main.getInstance().getDefaultConfig().isBossBarEnabled() && !BossBarHandler.getInstance().registerSearchPlayer(player, 0)) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Error trying to register a player boss bar!");
+        }
+    }
 
-		editingPlayers.put(player, part);
+    public @Nullable Collection<ArmorStand> getSearchedArmorStands(@Nonnull UUID player) {
+        Preconditions.checkNotNull(player, "player");
 
-		Accuracy accuracy = editingAccuracy.get(player);
-		String accuracyName = Main.getInstance().getDefaultConfig().getDefaultAccuracy();
+        if (searchingPlayers.get(player) == null) {
+            return null;
+        }
 
-		if (accuracy == null) {
-			try {
-				accuracy = Accuracy.valueOf(accuracyName);
-			} catch (Exception e) {
-				Main.getInstance().getLogger().log(Level.SEVERE, "Could not load accuracy from config default " +
-						accuracyName, e);
-				return;
-			}
-		}
+        return searchingPlayers.get(player);
+    }
 
-		editingAccuracy.put(player, accuracy);
-		editedArmorStands.put(player, armorStands);
+    public Set<UUID> getSearchingPlayers() {
+        return searchingPlayers.keySet();
+    }
 
-		if (Main.getInstance().getDefaultConfig().isScoreboardEnabled() && !ScoreboardHandler.getInstance().registerPlayer(player)) {
-			Main.getInstance().getLogger().log(Level.SEVERE, "Error trying to register a player scoreboard!");
-		}
+    public void addEditingPlayer(@Nonnull UUID player, @Nonnull Part part, @Nonnull ArmorStand armorStand) {
+        Preconditions.checkNotNull(armorStand, "armorStand");
 
-		if (Main.getInstance().getDefaultConfig().isBossBarEnabled() && !BossBarHandler.getInstance().registerPlayer(player)) {
-			Main.getInstance().getLogger().log(Level.SEVERE, "Error trying to register a player boss bar!");
-		}
+        addEditingPlayer(player, part, Collections.singleton(armorStand));
+    }
 
-		CompletableFuture.runAsync(actionBarTask);
-	}
+    public void addEditingPlayer(@Nonnull UUID player, @Nonnull Part part, @Nonnull Set<ArmorStand> armorStands) {
+        Preconditions.checkNotNull(player, "player");
+        Preconditions.checkNotNull(part, "part");
+        Preconditions.checkNotNull(armorStands, "armorStands");
 
-	public @Nonnull
-	Set<ArmorStand> getEditedArmorstands(@Nonnull UUID player) {
-		Preconditions.checkNotNull(player, "player");
+        editingPlayers.put(player, part);
 
-		if (editedArmorStands.get(player) == null) {
-			return ImmutableSet.of();
-		}
+        Accuracy accuracy = editingAccuracy.get(player);
+        String accuracyName = Main.getInstance().getDefaultConfig().getDefaultAccuracy();
 
-		return ImmutableSet.copyOf(editedArmorStands.get(player));
-	}
+        if (accuracy == null) {
+            try {
+                accuracy = Accuracy.valueOf(accuracyName);
+            } catch (Exception e) {
+                Main.getInstance().getLogger().log(Level.SEVERE, "Could not load accuracy from config default " +
+                        accuracyName, e);
+                return;
+            }
+        }
 
-	public boolean removeEditingPlayer(@Nonnull UUID player) {
-		Preconditions.checkNotNull(player, "player");
+        editingAccuracy.put(player, accuracy);
+        editedArmorStands.put(player, armorStands);
 
-		BossBarHandler.getInstance().unregisterPlayer(player);
-		ScoreboardHandler.getInstance().unregisterPlayer(player);
-		actionBarTask.onEditingStop(player);
+        if (Main.getInstance().getDefaultConfig().isScoreboardEnabled() && !ScoreboardHandler.getInstance().registerPlayer(player)) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Error trying to register a player scoreboard!");
+        }
 
-		//editing accuracy will be preserved
-		editedArmorStands.remove(player);
-		proEditors.remove(player);
+        if (Main.getInstance().getDefaultConfig().isBossBarEnabled() && !BossBarHandler.getInstance().registerEditorPlayer(player)) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Error trying to register a player boss bar!");
+        }
 
-		if (InventoryMenu.getOpenedInventories().get(player) != null) {
-			Player thePlayer = Bukkit.getPlayer(player);
-			if (thePlayer != null) {
-				thePlayer.closeInventory();
-			}
-		}
+        CompletableFuture.runAsync(actionBarTask);
+    }
 
-		return editingPlayers.remove(player) != null;
-	}
+    public @Nonnull
+    Set<ArmorStand> getEditedArmorstands(@Nonnull UUID player) {
+        Preconditions.checkNotNull(player, "player");
 
-	public void editNextPart(@Nonnull UUID player) {
-		Preconditions.checkNotNull(player, "player");
+        if (editedArmorStands.get(player) == null) {
+            return ImmutableSet.of();
+        }
 
-		Part part = getEditingPart(player);
-		if (part == null) {
-			Main.getInstance().getLogger().log(Level.SEVERE, "Tried to update a non editing player's part with " +
-					"UUID " + player);
-			return;
-		}
+        return ImmutableSet.copyOf(editedArmorStands.get(player));
+    }
 
-		addEditingPlayer(player, part.nextPart(), getEditedArmorstands(player));
-	}
+    public boolean removeEditingPlayer(@Nonnull UUID player) {
+        Preconditions.checkNotNull(player, "player");
 
-	public void editPreviousPart(@Nonnull UUID player) {
-		Preconditions.checkNotNull(player, "player");
+        BossBarHandler.getInstance().unregisterPlayer(player);
+        ScoreboardHandler.getInstance().unregisterPlayer(player);
+        actionBarTask.onEditingStop(player);
 
-		Part part = getEditingPart(player);
-		if (part == null) {
-			Main.getInstance().getLogger().log(Level.SEVERE, "Tried to update a non editing player's part with " +
-					"UUID " + player);
-			return;
-		}
+        //editing accuracy will be preserved
+        editedArmorStands.remove(player);
+        proEditors.remove(player);
 
-		addEditingPlayer(player, part.previousPart(), getEditedArmorstands(player));
-	}
+        if (InventoryMenu.getOpenedInventories().get(player) != null) {
+            Player thePlayer = Bukkit.getPlayer(player);
+            if (thePlayer != null) {
+                thePlayer.closeInventory();
+            }
+        }
 
-	public void updateAccuracy(@Nonnull UUID player, boolean moreAccurate) {
-		Preconditions.checkNotNull(player, "player");
+        return editingPlayers.remove(player) != null;
+    }
 
-		Accuracy oldAccuracy = editingAccuracy.get(player);
-		Accuracy newAccuracy = moreAccurate ? oldAccuracy.moreAccurate() : oldAccuracy.lessAccurate();
+    public boolean removeSearchingPlayer(@Nonnull UUID player) {
+        Preconditions.checkNotNull(player, "player");
+        boolean contained = searchingPlayers.containsKey(player);
+        searchingPlayers.remove(player);
+        BossBarHandler.getInstance().unregisterPlayer(player);
+        return contained;
+    }
 
-		editingAccuracy.put(player, newAccuracy);
-		if (Main.getInstance().getDefaultConfig().isBossBarEnabled() && !BossBarHandler.getInstance().updatePlayerBar(player)) {
-			Main.getInstance().getLogger().log(Level.SEVERE, "Could not update player boss bar");
-		}
-	}
+    public void editNextPart(@Nonnull UUID player) {
+        Preconditions.checkNotNull(player, "player");
 
-	public @Nullable
-	Accuracy getPlayerAccuracy(@Nonnull UUID player) {
-		Preconditions.checkNotNull(player, "player");
+        Part part = getEditingPart(player);
+        if (part == null) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Tried to update a non editing player's part with " +
+                    "UUID " + player);
+            return;
+        }
 
-		Accuracy accuracy = editingAccuracy.get(player);
-		if (accuracy == null) {
-			Main.getInstance().getLogger().log(Level.SEVERE, "Tried to query accuracy for non editing player with UUID " + player);
-			return null;
-		}
+        addEditingPlayer(player, part.nextPart(), getEditedArmorstands(player));
+    }
 
-		return accuracy;
-	}
+    public void editPreviousPart(@Nonnull UUID player) {
+        Preconditions.checkNotNull(player, "player");
 
-	public Optional<ArmorStand> getSingleArmorstand(@Nonnull UUID player) {
-		Preconditions.checkNotNull(player, "player");
+        Part part = getEditingPart(player);
+        if (part == null) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Tried to update a non editing player's part with " +
+                    "UUID " + player);
+            return;
+        }
 
-		if (getEditedArmorstands(player).size() != 1) {
-			return Optional.empty();
-		}
-		return getEditedArmorstands(player).stream().findAny();
-	}
+        addEditingPlayer(player, part.previousPart(), getEditedArmorstands(player));
+    }
 
-	public @Nullable
-	UUID getArmorStandEditor(@Nonnull ArmorStand armorStand) {
-		Preconditions.checkNotNull(armorStand, "armorStand");
+    public void updateAccuracy(@Nonnull UUID player, boolean moreAccurate) {
+        Preconditions.checkNotNull(player, "player");
 
-		return editedArmorStands.entrySet()
-				.stream()
-				.filter(entry -> entry.getValue().stream()
-						.anyMatch(armorStand::equals))
-				.findFirst()
-				.map(Map.Entry::getKey)
-				.orElse(null);
-	}
+        Accuracy oldAccuracy = editingAccuracy.get(player);
+        Accuracy newAccuracy = moreAccurate ? oldAccuracy.moreAccurate() : oldAccuracy.lessAccurate();
 
-	public void onAdjustmentMade(@Nonnull UUID player, double x, double y, double z) {
-		Preconditions.checkNotNull(player, "player");
+        editingAccuracy.put(player, newAccuracy);
+        if (Main.getInstance().getDefaultConfig().isBossBarEnabled() && !BossBarHandler.getInstance().updatePlayerEditBar(player)) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Could not update player boss bar");
+        }
+    }
 
-		if (!isEditingPlayer(player)) {
-			Main.getInstance().getLogger().log(Level.WARNING, "Tried to make armor stand adjustment for a player currently not editing");
-			return;
-		}
+    public @Nullable
+    Accuracy getPlayerAccuracy(@Nonnull UUID player) {
+        Preconditions.checkNotNull(player, "player");
 
-		Part part = getEditingPart(player);
-		if (part == null) {
-			Main.getInstance().getLogger().log(Level.SEVERE, "Editing player with UUID " + player + " has no corresponding part.");
-			return;
-		}
+        Accuracy accuracy = editingAccuracy.get(player);
+        if (accuracy == null) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Tried to query accuracy for non editing player with UUID " + player);
+            return null;
+        }
 
-		Set<ArmorStand> armorStands = editedArmorStands.get(player);
-		if (armorStands == null || armorStands.isEmpty()) {
-			Main.getInstance().getLogger().log(Level.SEVERE, "Editing player with UUID " + player + " has no armor stands to adjust!");
-			return;
-		}
+        return accuracy;
+    }
 
-		Player thePlayer = Bukkit.getPlayer(player);
-		if (thePlayer == null) {
-			Main.getInstance().getLogger().log(Level.SEVERE, "Unknown player with UUID " + player + " tried to make an" +
-					" adjustment");
-			return;
-		}
+    public void lockPlayerAxis(Player player, Vector axis) {
+        playerLockedAxis.put(player.getUniqueId(), axis);
+    }
 
-		if (part == Part.BODY && plugin.willBeTooFar(thePlayer, armorStands, new Vector(x, y, z))) {
-			return;
-		}
+    public void unlockPlayerAxis(Player player) {
+        playerLockedAxis.remove(player.getUniqueId());
+    }
 
-		if (part == Part.BODY && plugin.isInteractCancelled(thePlayer, armorStands, new Vector(x, y, z))) {
-			return;
-		}
+    public @Nullable
+    Vector getPlayerLockedAxis(Player player) {
+        return playerLockedAxis.get(player.getUniqueId());
+    }
 
-		if (part == Part.BODY && plugin.getDefaultConfig().isDisableGravityOnYPositionChange() && y != 0) {
-			if (!thePlayer.hasPermission(plugin.getDefaultConfig().getGravityPermission())) {
-				thePlayer.sendMessage(Main.colorString(plugin.getMessages().getCannotChangeYAxis()));
-				return;
-			}
-			armorStands.forEach(armorStand -> armorStand.setGravity(false));
-		}
+    public boolean isPlayerAxisLocked(Player player) {
+        return playerLockedAxis.containsKey(player.getUniqueId());
+    }
 
-		armorStands.forEach(armorStand -> part.add(armorStand, x, y, z));
+    public Optional<ArmorStand> getSingleArmorstand(@Nonnull UUID player) {
+        Preconditions.checkNotNull(player, "player");
 
-		if (Main.getInstance().getDefaultConfig().isScoreboardEnabled() && !ScoreboardHandler.getInstance().updatePlayer(player)) {
-			Main.getInstance().getLogger().log(Level.SEVERE, "Could not update scoreboard for player with UUID " + player);
-		}
-	}
+        if (getEditedArmorstands(player).size() != 1) {
+            return Optional.empty();
+        }
+        return getEditedArmorstands(player).stream().findAny();
+    }
+
+    public @Nullable
+    UUID getArmorStandEditor(@Nonnull ArmorStand armorStand) {
+        Preconditions.checkNotNull(armorStand, "armorStand");
+
+        return editedArmorStands.entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().stream()
+                        .anyMatch(armorStand::equals))
+                .findFirst()
+                .map(Map.Entry::getKey)
+                .orElse(null);
+    }
+
+    public Vector getAdjustmentVector(Player player) {
+        Vector lockedAxis = getPlayerLockedAxis(player);
+        if (lockedAxis != null) {
+            return lockedAxis.clone();
+        }
+        Vector adjustment = new Vector(0, 0, 0);
+        Location playerLocation = player.getLocation();
+
+        int yaw = Math.round(playerLocation.getYaw() + 45);
+
+        if (yaw < 0) {
+            yaw += 360;
+        }
+
+        yaw = yaw / 90;
+
+        if (playerLocation.getPitch() <= -60 || playerLocation.getPitch() >= 70) {
+            adjustment.setY(1);
+        } else if (yaw % 2 == 0) {
+            adjustment.setZ(1);
+        } else {
+            adjustment.setX(1);
+        }
+
+        return adjustment;
+    }
+
+    public void onAdjustmentMade(@Nonnull UUID player, double x, double y, double z) {
+        Preconditions.checkNotNull(player, "player");
+
+        if (!isEditingPlayer(player)) {
+            Main.getInstance().getLogger().log(Level.WARNING, "Tried to make armor stand adjustment for a player currently not editing");
+            return;
+        }
+
+        Part part = getEditingPart(player);
+        if (part == null) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Editing player with UUID " + player + " has no corresponding part.");
+            return;
+        }
+
+        Set<ArmorStand> armorStands = editedArmorStands.get(player);
+        if (armorStands == null || armorStands.isEmpty()) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Editing player with UUID " + player + " has no armor stands to adjust!");
+            return;
+        }
+
+        Player thePlayer = Bukkit.getPlayer(player);
+        if (thePlayer == null) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Unknown player with UUID " + player + " tried to make an" +
+                    " adjustment");
+            return;
+        }
+
+        boolean anyLocked = armorStands.stream().anyMatch(armorStand -> handleLockedArmorStand(thePlayer, armorStand));
+        if (anyLocked) {
+            return;
+        }
+
+        if (part == Part.BODY && plugin.willBeTooFar(thePlayer, armorStands, new Vector(x, y, z))) {
+            return;
+        }
+
+        if (part == Part.BODY && plugin.isInteractCancelled(thePlayer, armorStands, new Vector(x, y, z))) {
+            return;
+        }
+
+        if (part == Part.BODY && plugin.getDefaultConfig().isDisableGravityOnYPositionChange() && y != 0) {
+            if (!thePlayer.hasPermission(plugin.getDefaultConfig().getGravityPermission())) {
+                thePlayer.sendMessage(Main.colorString(plugin.getMessages().getCannotChangeYAxis()));
+                return;
+            }
+            armorStands.forEach(armorStand -> armorStand.setGravity(false));
+        }
+
+        armorStands.forEach(armorStand -> part.add(armorStand, x, y, z));
+
+        if (Main.getInstance().getDefaultConfig().isScoreboardEnabled() && !ScoreboardHandler.getInstance().updatePlayer(player)) {
+            Main.getInstance().getLogger().log(Level.SEVERE, "Could not update scoreboard for player with UUID " + player);
+        }
+    }
 
 }

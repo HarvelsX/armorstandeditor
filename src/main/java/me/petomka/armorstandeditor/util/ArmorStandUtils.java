@@ -15,7 +15,9 @@ import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.permissions.Permissible;
 import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.EulerAngle;
 import org.bukkit.util.io.BukkitObjectInputStream;
@@ -30,7 +32,8 @@ import java.util.stream.Collectors;
 @UtilityClass
 public class ArmorStandUtils {
 
-    private final String NBT_TAG_KEY = "armorStandEdit";
+    private final String NBT_TAG_KEY_CONTAINER = "armorStandEdit";
+    private final String NBT_TAG_KEY_LOCKED = "armorStandEdit.locked";
 
     private static NamespacedKey key(String key) {
         return new NamespacedKey(Main.getInstance(), key);
@@ -68,6 +71,44 @@ public class ArmorStandUtils {
         return container.get(key(key), PersistentDataType.STRING);
     }
 
+    public static boolean isArmorStandLocked(PersistentDataHolder holder) {
+        PersistentDataContainer dataContainer = holder.getPersistentDataContainer();
+        return getBoolean(dataContainer, NBT_TAG_KEY_LOCKED);
+    }
+
+    public static void setArmorStandLocked(ArmorStand armorStand, boolean locked) {
+        PersistentDataContainer dataContainer = armorStand.getPersistentDataContainer();
+        if (locked) {
+            setBoolean(dataContainer, NBT_TAG_KEY_LOCKED, true);
+        } else {
+            dataContainer.remove(key(NBT_TAG_KEY_LOCKED));
+        }
+    }
+
+    public static boolean canEditArmorStand(Permissible permissible, PersistentDataHolder dataHolder) {
+        String editPermission = Main.getInstance().getDefaultConfig().getLockArmorStandPermission();
+        if (permissible.isOp() || permissible.hasPermission(editPermission)) {
+            return true;
+        }
+        return !isArmorStandLocked(dataHolder);
+    }
+
+    public static boolean handleLockedArmorStand(Player player, ArmorStand armorStand) {
+        if (!ArmorStandUtils.canEditArmorStand(player, armorStand)) {
+            player.sendMessage(Main.colorString(Main.getInstance().getMessages().getArmorStandLocked()));
+            return true;
+        }
+        return false;
+    }
+
+    public static boolean handleLockedArmorStandNoBypass(Player player, ArmorStand armorStand) {
+        if (ArmorStandUtils.isArmorStandLocked(armorStand)) {
+            player.sendMessage(Main.colorString(Main.getInstance().getMessages().getArmorStandLocked()));
+            return true;
+        }
+        return false;
+    }
+
     public ItemStack saveToItem(ArmorStand armorStand, Player player) {
         boolean hasCustomName = armorStand.getCustomName() != null && !armorStand.getCustomName().isEmpty();
         Messages messages = Main.getInstance().getMessages();
@@ -103,6 +144,8 @@ public class ArmorStandUtils {
         setBoolean(dataContainer, "visible", armorStand.isVisible());
         setBoolean(dataContainer, "customNameVisible", armorStand.isCustomNameVisible());
         setBoolean(dataContainer, "glowing", armorStand.isGlowing());
+        setBoolean(dataContainer, "marker", armorStand.isMarker());
+        setBoolean(dataContainer, "locked", isArmorStandLocked(armorStand));
 
         setByteArray(dataContainer, "headPose", ArmorStandUtils.serializeEulerAngle(armorStand.getHeadPose()));
         setByteArray(dataContainer, "leftArmPose", ArmorStandUtils.serializeEulerAngle(armorStand.getLeftArmPose()));
@@ -148,7 +191,7 @@ public class ArmorStandUtils {
             }
         }
 
-        parentContainer.set(key(NBT_TAG_KEY), PersistentDataType.TAG_CONTAINER, dataContainer);
+        parentContainer.set(key(NBT_TAG_KEY_CONTAINER), PersistentDataType.TAG_CONTAINER, dataContainer);
 
         copyItem.setItemMeta(meta);
 
@@ -161,7 +204,7 @@ public class ArmorStandUtils {
             return false;
         }
         PersistentDataContainer container = itemMeta.getPersistentDataContainer();
-        return container.has(key(NBT_TAG_KEY), PersistentDataType.TAG_CONTAINER);
+        return container.has(key(NBT_TAG_KEY_CONTAINER), PersistentDataType.TAG_CONTAINER);
     }
 
     public boolean isCopyWorthIt(ArmorStand armorStand) {
@@ -216,9 +259,9 @@ public class ArmorStandUtils {
         }
 
         PersistentDataContainer parentContainer = itemMeta.getPersistentDataContainer();
-        PersistentDataContainer dataContainer = parentContainer.get(key(NBT_TAG_KEY), PersistentDataType.TAG_CONTAINER);
+        PersistentDataContainer dataContainer = parentContainer.get(key(NBT_TAG_KEY_CONTAINER), PersistentDataType.TAG_CONTAINER);
         if (dataContainer == null) {
-            Main.getInstance().getLogger().log(Level.SEVERE, "Wrong value stored for NBT key + \"" + ArmorStandUtils.NBT_TAG_KEY + "\"");
+            Main.getInstance().getLogger().log(Level.SEVERE, "Wrong value stored for NBT key + \"" + ArmorStandUtils.NBT_TAG_KEY_CONTAINER + "\"");
             return;
         }
 
@@ -230,6 +273,8 @@ public class ArmorStandUtils {
         armorStand.setVisible(getBoolean(dataContainer, "visible"));
         armorStand.setCustomNameVisible(getBoolean(dataContainer, "customNameVisible"));
         armorStand.setGlowing(getBoolean(dataContainer, "glowing"));
+        armorStand.setMarker(getBoolean(dataContainer, "marker"));
+        setArmorStandLocked(armorStand, getBoolean(dataContainer, "locked"));
 
         armorStand.setHeadPose(ArmorStandUtils.deserializeToEuler(getByteArray(dataContainer, "headPose")));
         armorStand.setLeftArmPose(ArmorStandUtils.deserializeToEuler(getByteArray(dataContainer, "leftArmPose")));

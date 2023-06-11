@@ -1,10 +1,7 @@
 package me.petomka.armorstandeditor.util;
 
 import lombok.RequiredArgsConstructor;
-import org.bukkit.EntityEffect;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.PistonMoveReaction;
 import org.bukkit.entity.Entity;
@@ -255,6 +252,21 @@ public class EntityLocationProxy implements Entity {
 	}
 
 	@Override
+	public Sound getSwimSound() {
+		return originalEntity.getSwimSound();
+	}
+
+	@Override
+	public Sound getSwimSplashSound() {
+		return originalEntity.getSwimSplashSound();
+	}
+
+	@Override
+	public Sound getSwimHighSpeedSplashSound() {
+		return originalEntity.getSwimHighSpeedSplashSound();
+	}
+
+	@Override
 	public boolean isInsideVehicle() {
 		return originalEntity.isInsideVehicle();
 	}
@@ -277,6 +289,16 @@ public class EntityLocationProxy implements Entity {
 	@Override
 	public boolean isCustomNameVisible() {
 		return originalEntity.isCustomNameVisible();
+	}
+
+	@Override
+	public void setVisibleByDefault(boolean b) {
+		originalEntity.setVisibleByDefault(b);
+	}
+
+	@Override
+	public boolean isVisibleByDefault() {
+		return originalEntity.isVisibleByDefault();
 	}
 
 	@Override

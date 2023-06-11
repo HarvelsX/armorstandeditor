@@ -89,6 +89,9 @@ public class DefaultConfig extends Config {
 	@Comment("Whether a user can toggle an armorstand's glowing effect, also affects pro-mode!")
 	private String glowingPermission = "armorstandedit.flag.glowing";
 
+	@Comment("Whether a user can modify the marker flag of an armor stand.")
+	private String markerArmorStandPermission = "armorstandedit.flag.marker";
+
 	@Comment("Whether a user can directly set an armorstand's equipment via gui - does not affect normal equipping.")
 	private String setEquipPermission = "armorstandedit.set_equip";
 
@@ -97,6 +100,12 @@ public class DefaultConfig extends Config {
 
 	@Comment("Whether a user can modify the commands attached to an armor stand.")
 	private String attachCommandsPermission = "armorstandedit.attach_commands";
+
+	@Comment("Whether a user can modify the locked state of an armor stand.")
+	private String lockArmorStandPermission = "armorstandedit.lock_armorstand";
+
+	@Comment("Whether a user can search for armor stands packed close together with a compass.")
+	private String armorStandSearchPermission = "armorstandedit.search";
 
 	@Comment("Whether custom armor stands should drop a copy of themselves when they are destroyed")
 	private boolean dropCopyOfDestroyedArmorStand = true;
@@ -127,6 +136,12 @@ public class DefaultConfig extends Config {
 	//Comment added manually in constructor
 	@Path("bossBarStyle")
 	private String bossBarStyle = BarStyle.SEGMENTED_6.name();
+
+	@Path("searchBarColor")
+	private String searchBarColor = BarColor.BLUE.name();
+
+	@Path("searchBarStyle")
+	private String searchBarStyle = BarStyle.SOLID.name();
 
 	@Comment("Default accuracy to begin editing with, possible values are: SMALLEST, SMALLER, SMALL, LARGE, LARGER, LARGEST")
 	private String defaultAccuracy = "LARGE";

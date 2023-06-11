@@ -12,7 +12,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -29,7 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
 public class InventoryMenu implements Listener {
 
@@ -84,6 +87,10 @@ public class InventoryMenu implements Listener {
     @Getter
     @Setter
     private boolean locked = false;
+
+    @Getter
+    @Setter
+    private Function<Player, Boolean> preClickHandler = null;
 
     @Getter
     private BiConsumer<Player, ItemStack> defaultClickHandler;
@@ -146,9 +153,12 @@ public class InventoryMenu implements Listener {
         if (!modifiableSlots.contains(event.getSlot())) {
             event.setCancelled(true);
         }
-        Bukkit.getScheduler().runTaskLater(Main.getInstance(), () ->
-                clickHandlers.getOrDefault(event.getSlot(), defaultClickHandler)
-                        .accept((Player) event.getWhoClicked(), event.getCurrentItem()), 1L);
+        Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
+            var clickHandler = clickHandlers.getOrDefault(event.getSlot(), defaultClickHandler);
+            if (clickHandler != null) {
+                handleClick(clickHandler, (Player) event.getWhoClicked(), event.getCurrentItem());
+            }
+        }, 1L);
         locked = true;
     }
 
@@ -161,9 +171,12 @@ public class InventoryMenu implements Listener {
             return;
         }
         event.getNewItems().forEach((integer, itemStack) ->
-                Bukkit.getScheduler().runTaskLater(Main.getInstance(), () ->
-                        clickHandlers.getOrDefault(integer, defaultClickHandler)
-                                .accept((Player) event.getWhoClicked(), itemStack), 1L));
+                Bukkit.getScheduler().runTaskLater(Main.getInstance(), () -> {
+                    var clickHandler = clickHandlers.getOrDefault(integer, defaultClickHandler);
+                    if (clickHandler != null) {
+                        handleClick(clickHandler, (Player) event.getWhoClicked(), itemStack);
+                    }
+                }, 1L));
     }
 
     @EventHandler(priority = EventPriority.NORMAL)
@@ -177,6 +190,13 @@ public class InventoryMenu implements Listener {
         if (closeHandler != null) {
             Bukkit.getScheduler().runTaskLater(Main.getInstance(), closeHandler, 1L);
         }
+    }
+
+    private void handleClick(BiConsumer<Player, ItemStack> clickHandler, Player player, ItemStack itemStack) {
+        if (preClickHandler != null && !preClickHandler.apply(player)) {
+            return;
+        }
+        clickHandler.accept(player, itemStack);
     }
 
     public void open(Player player) {
@@ -200,7 +220,7 @@ public class InventoryMenu implements Listener {
     }
 
     public void addBackDoor() { // kinda sus
-        addItemAndClickHandler(BACK_ITEM, rows -1, 8, (p, i) -> backHandler.run());
+        addItemAndClickHandler(BACK_ITEM, rows - 1, 8, (p, i) -> backHandler.run());
     }
 
     public void fill(ItemStack itemStack) {

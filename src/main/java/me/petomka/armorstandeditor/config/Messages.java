@@ -7,6 +7,7 @@ import net.cubespace.Yamler.Config.Comment;
 import net.cubespace.Yamler.Config.Config;
 import net.cubespace.Yamler.Config.ConfigMode;
 import net.cubespace.Yamler.Config.InvalidConfigurationException;
+import org.checkerframework.checker.units.qual.C;
 
 import java.io.File;
 
@@ -104,6 +105,9 @@ public class Messages extends Config {
 
 	@Comment("What the BossBar displaying the adjustment size should say")
 	private String bossBarTitle = "&6Current adjustment size: {size}";
+
+	@Comment("What the BossBar displaying the search progress should say")
+	private String searchBarTitle = "&9Searching for armor stands: {count} nearby";
 	
 	private String smallestAdjustmentName = "smallest (0.01)";
 	private String smallerAdjustmentName = "smaller (0.05)";
@@ -127,6 +131,8 @@ public class Messages extends Config {
 	private String inventory_toggleShowCustomName = "&6Show custom name";
 	private String inventory_toggleGlowing = "&6Glowing";
 	private String inventory_attachCommands = "&6Manage commands";
+	private String inventory_toggleLockArmorStnad = "&6Editor locked";
+	private String inventory_toggleMarker = "&6Marker";
 	private String inventory_setEquip = "&6Set equipment";
 	private String inventory_setEquipHelmet = "&6Helmet";
 	private String inventory_setEquipChest = "&6Chestplate";
@@ -151,4 +157,12 @@ public class Messages extends Config {
 
 	private String toggle_on = "&2Enabled &aarmor stand editing for &6{name}";
 	private String toggle_off = "&cDisabled &aarmor stand editing for &6{name}";
+
+	private String armorStandLocked = "&cThis armor stand has been locked. You cannot edit it.";
+
+	private String axisLocked = "&aYou have locked your axis.";
+	private String axisUnlocked = "&aYou have unlocked your axis.";
+
+	private String searchEnabled = "&aYou have enabled armor stand search.";
+	private String searchDisabled = "&cYou have disabled armor stand search.";
 }

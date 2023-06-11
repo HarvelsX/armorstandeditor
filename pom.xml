@@ -6,7 +6,7 @@
 
     <groupId>me.petomka</groupId>
     <artifactId>armorstandeditor</artifactId>
-    <version>1.7</version>
+    <version>1.8</version>
 
     <build>
         <plugins>
@@ -48,6 +48,9 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.github.Cube-Space.Yamler:Yamler-Core</include>
+                                    <include>org.bstats:bstats-base</include>
+                                    <include>org.bstats:bstats-bukkit</include>
+                                    <include>org.yaml:snakeyaml</include>
                                 </includes>
                             </artifactSet>
 
@@ -57,6 +60,21 @@
                                     <shadedPattern>me.petomka.armorstandeditor.net.cubespace</shadedPattern>
                                     <includes>
                                         <include>net.cubespace.*</include>
+                                    </includes>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <!-- Replace this with your package! -->
+                                    <shadedPattern>me.petomka.armorstandeditor.org.bstats</shadedPattern>
+                                    <includes>
+                                        <include>org.bstats.*</include>
+                                    </includes>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.yaml</pattern>
+                                    <shadedPattern>me.petomka.armorstandeditor.org.yaml</shadedPattern>
+                                    <includes>
+                                        <include>org.yaml.*</include>
                                     </includes>
                                 </relocation>
                             </relocations>
@@ -96,7 +114,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.18.1-R0.1-SNAPSHOT</version>
+            <version>1.20-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
 
@@ -120,6 +138,19 @@
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
             <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.14</version>
         </dependency>
     </dependencies>
 

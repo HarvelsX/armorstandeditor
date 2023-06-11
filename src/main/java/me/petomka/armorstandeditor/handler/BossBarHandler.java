@@ -26,11 +26,11 @@ public class BossBarHandler {
 
 	private Map<UUID, BossBar> playerBossBars = Maps.newHashMap();
 
-	public boolean registerPlayer(@Nonnull UUID player) {
+	public boolean registerEditorPlayer(@Nonnull UUID player) {
 		Preconditions.checkNotNull(player, "player");
 
 		if (isRegistered(player)) {
-			return updatePlayerBar(player);
+			return updatePlayerEditBar(player);
 		}
 
 		Player thePlayer = Bukkit.getPlayer(player);
@@ -40,11 +40,35 @@ public class BossBarHandler {
 			return false;
 		}
 
-		BossBar bar = createNewBossBar();
+		BossBar bar = createNewEditBossBar();
 		if (bar != null) {
 			playerBossBars.put(player, bar);
 			bar.addPlayer(thePlayer);
-			updatePlayerBar(player);
+			updatePlayerEditBar(player);
+			return true;
+		}
+		return false;
+	}
+
+	public boolean registerSearchPlayer(@Nonnull UUID player, int count) {
+		Preconditions.checkNotNull(player, "player");
+
+		if (isRegistered(player)) {
+			return updatePlayerSearchBar(player, count);
+		}
+
+		Player thePlayer = Bukkit.getPlayer(player);
+		if (thePlayer == null) {
+			Main.getInstance().getLogger().log(Level.SEVERE, "Cannot register bossbar for unknown player " +
+					"with unknown UUID " + player);
+			return false;
+		}
+
+		BossBar bar = createNewSearchBossBar();
+		if (bar != null) {
+			playerBossBars.put(player, bar);
+			bar.addPlayer(thePlayer);
+			updatePlayerSearchBar(player, count);
 			return true;
 		}
 		return false;
@@ -62,7 +86,7 @@ public class BossBarHandler {
 		return playerBossBars.containsKey(player);
 	}
 
-	public boolean updatePlayerBar(@Nonnull UUID player) {
+	public boolean updatePlayerEditBar(@Nonnull UUID player) {
 		Preconditions.checkNotNull(player, "player");
 
 		BossBar bar = playerBossBars.get(player);
@@ -82,7 +106,7 @@ public class BossBarHandler {
 		return true;
 	}
 
-	private BossBar createNewBossBar() {
+	private BossBar createNewEditBossBar() {
 		Messages messages = Main.getInstance().getMessages();
 		DefaultConfig config = Main.getInstance().getDefaultConfig();
 
@@ -106,6 +130,52 @@ public class BossBarHandler {
 
 		return Bukkit.createBossBar(
 				messages.getBossBarTitle(),
+				barColor,
+				barStyle
+		);
+	}
+
+	public boolean updatePlayerSearchBar(@Nonnull UUID player, int count) {
+		Preconditions.checkNotNull(player, "player");
+
+		BossBar bar = playerBossBars.get(player);
+		if (bar == null) {
+			return false;
+		}
+
+		String title = Main.getInstance().getMessages().getSearchBarTitle();
+		title = title.replace("{count}", String.valueOf(count));
+
+		bar.setProgress(1.0f);
+		bar.setTitle(Main.colorString(title));
+		return true;
+	}
+
+	private BossBar createNewSearchBossBar() {
+		Messages messages = Main.getInstance().getMessages();
+		DefaultConfig config = Main.getInstance().getDefaultConfig();
+
+		BarColor barColor;
+		BarStyle barStyle;
+
+		try {
+			barColor = BarColor.valueOf(config.getSearchBarColor());
+		} catch (Exception exc) {
+			Main.getInstance().getLogger().log(Level.SEVERE, "Invalid barColor \"" +
+					config.getBossBarColor() + "\"", exc);
+			return null;
+		}
+
+		try {
+			barStyle = BarStyle.valueOf(config.getSearchBarStyle());
+		} catch (Exception exc) {
+			Main.getInstance().getLogger().log(Level.SEVERE, "Invalid barStyle \"" +
+					config.getBossBarStyle() + "\"", exc);
+			return null;
+		}
+
+		return Bukkit.createBossBar(
+				Main.colorString(messages.getSearchBarTitle()),
 				barColor,
 				barStyle
 		);
