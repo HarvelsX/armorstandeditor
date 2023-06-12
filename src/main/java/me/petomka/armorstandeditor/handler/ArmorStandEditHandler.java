@@ -85,7 +85,8 @@ public class ArmorStandEditHandler {
         Preconditions.checkNotNull(player, "player");
         searchingPlayers.put(player, armorStands);
 
-        if (Main.getInstance().getDefaultConfig().isBossBarEnabled() && !BossBarHandler.getInstance().registerSearchPlayer(player, 0)) {
+        if (Main.getInstance().getDefaultConfig().isBossBarEnabled()
+                && !BossBarHandler.getInstance().registerSearchPlayer(player, armorStands.size())) {
             Main.getInstance().getLogger().log(Level.SEVERE, "Error trying to register a player boss bar!");
         }
     }

@@ -48,9 +48,11 @@ public class ArmorStandSearchListener implements Listener, Runnable {
         if (event.getHand() != EquipmentSlot.HAND) {
             return;
         }
+        Player player = event.getPlayer();
+        boolean isSearching = ArmorStandEditHandler.getInstance().isSearchingPlayer(player.getUniqueId());
         ItemStack itemStack = event.getItem();
         boolean isLeftClick = event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK;
-        if (isLeftClick && !event.getPlayer().isSneaking()) {
+        if (isSearching && isLeftClick && !event.getPlayer().isSneaking()) {
             disableSearch(event.getPlayer());
             event.setCancelled(true);
             return;
@@ -58,7 +60,7 @@ public class ArmorStandSearchListener implements Listener, Runnable {
         if (!event.getPlayer().isSneaking()) {
             return;
         }
-        if (isLeftClick && itemStack.getType() == SEARCH_ITEM) {
+        if (isSearching && isLeftClick && itemStack.getType() == SEARCH_ITEM) {
             pickArmorStand(event.getPlayer());
             event.setCancelled(true);
             return;
@@ -69,12 +71,17 @@ public class ArmorStandSearchListener implements Listener, Runnable {
         if (itemStack.getType() != SEARCH_ITEM) {
             return;
         }
-        event.setCancelled(true);
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            String permission = main.getDefaultConfig().getArmorStandSearchPermission();
+            if (!player.hasPermission(permission)) {
+                return;
+            }
             enableSearch(event.getPlayer());
+            event.setCancelled(true);
             return;
         }
         disableSearch(event.getPlayer());
+        event.setCancelled(true);
     }
 
     @EventHandler
@@ -86,9 +93,6 @@ public class ArmorStandSearchListener implements Listener, Runnable {
             return;
         }
         event.setCancelled(true);
-        if (player.isSneaking()) {
-            return;
-        }
         pickArmorStand(player);
     }
 
